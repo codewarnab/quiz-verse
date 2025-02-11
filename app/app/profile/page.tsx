@@ -1,10 +1,24 @@
+"use client";
 import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Home, User, ChevronRight, BookmarkIcon, HelpCircle, LogOut } from "lucide-react";
+import { useUser } from "@clerk/clerk-react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export default function ProfilePage() {
+    const { user, isSignedIn, isLoaded } = useUser()
+
+
+    const userDetails = useQuery(api.user.getUser, { clerkId: user?.id! })
+
+    if (!isSignedIn || !isLoaded) {
+        return null;
+    }
+    console.log(userDetails)
+
     return (
         <div className="min-h-screen bg-black text-white">
             {/* Header */}

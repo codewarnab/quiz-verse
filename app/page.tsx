@@ -3,14 +3,8 @@
 import {
   Authenticated,
   Unauthenticated,
-  useMutation,
-  useQuery,
 } from "convex/react";
-import { api } from "../convex/_generated/api";
-import Link from "next/link";
-import { UserButton } from "@clerk/nextjs";
 import { SignInForm } from "@/components/SiginForm";
-import { BookOpen } from "lucide-react";
 import HomeContent from "@/components/Home";
 
 
