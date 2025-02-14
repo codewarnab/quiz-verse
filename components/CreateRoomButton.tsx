@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Link from "next/link";
+import { quizData } from "./SampleQuiz"
 
 export default function CreateRoomButton() {
   const [roomId, setRoomId] = useState<string | null>(null);
@@ -11,22 +12,20 @@ export default function CreateRoomButton() {
 
   const handleCreateRoom = async () => {
     const newRoomId = await createRoom({
-      name: "My Quiz Room",
-      description: "This is a quiz room",
+      name: "Quiz Room Name",
       quiz: {
-        title: "Sample Quiz",
-        questions: [
-          {
-            question: "What is 2 + 2?",
-            options: ["1", "2", "3", "4"],
-            answer: "4"
-          },
-          {
-            question: "What is 3 + 3?",
-            options: ["5", "6", "7", "8"],
-            answer: "6"
-          }
-        ]
+        ...quizData,
+        questions: quizData.questions.map(({ correctAnswer, points = 0, timeLimit = 60, ...rest }) => ({
+          ...rest,
+          correctAnswer,
+          points,
+          timeLimit
+        }))
+      }, // Use SampleQuiz as the quiz argument
+      settings: {
+        maxParticipants: 10,
+        randomizeQuestions: false,
+        waitForAllAnswers: true
       }
     });
     setRoomId(newRoomId);
