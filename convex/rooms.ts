@@ -2,7 +2,6 @@ import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { query } from "./_generated/server";
 
-
 export const createRoom = mutation({
   args: {
     name: v.string(),
@@ -40,17 +39,8 @@ export const createRoom = mutation({
       roomId: newRoomID,
       hostedBy: identity.name || "Unknown", // Name of the creator
       hostId: identity.subject, // User ID of the creator
-      // participants: [{
-      //   userId: identity.subject,
-      //   imageUrl: identity.pictureUrl || "",
-      //   email: identity.email || "",
-      //   name: identity.name || "Unknown",
-      //   score: 0,
-      //   status: "ready",
-      //   answers: []
-      // }], // Creator is first participant
       status: "waiting", // Initial status
-      quiz: args.quiz ?? { title: "",description:"", numberOfQuestions: 0, questions: [{ question: "", options: [""], explanation: "", correctAnswer: "", points: undefined, timeLimit: undefined }] },
+      quiz: args.quiz ?? { title: "", description: "", numberOfQuestions: 0, questions: [{ question: "", options: [""], explanation: "", correctAnswer: "", points: undefined, timeLimit: undefined }] },
       settings: args.settings ?? { maxParticipants: undefined, randomizeQuestions: undefined, waitForAllAnswers: undefined },
       startedAt: undefined,
       endedAt: undefined
@@ -60,56 +50,95 @@ export const createRoom = mutation({
   }
 });
 
-  export const getRoom = query({
-    args: {
-      roomId: v.string(),
-    },
-    handler: async (ctx, args) => {
-      const room = await ctx.db.query("rooms").withIndex("byRoomId", q => q.eq("roomId", args.roomId)).unique();
-      if (!room) {
-        throw new Error("Room not found");
-      }
-      return room;
-    },
-  });
+export const getRoom = query({
+  args: {
+    roomId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const room = await ctx.db.query("rooms").withIndex("byRoomId", q => q.eq("roomId", args.roomId)).unique();
+    if (!room) {
+      throw new Error("Room not found");
+    }
+    return room;
+  },
+});
 
-  export const getParticipantsInRoom= query({
-    args: {
-      roomId: v.string(),
-    },
-    handler: async (ctx, args) => {
-      const room = await ctx.db.query("rooms").withIndex("byRoomId", q => q.eq("roomId", args.roomId)).unique();
-      if (!room) {
-        throw new Error("Room not found");
-      }
-      return room.participants;
-    },
-  });
+export const getParticipantsInRoom = query({
+  args: {
+    roomId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const room = await ctx.db.query("rooms").withIndex("byRoomId", q => q.eq("roomId", args.roomId)).unique();
+    if (!room) {
+      throw new Error("Room not found");
+    }
+    return room.participants;
+  },
+});
 
-  // export const joinRoom = mutation({
-  //   args: {
-  //     roomId: v.string()
-  //   },
-  //   handler: async (ctx, args) => {
-  //     const identity = await ctx.auth.getUserIdentity();
-  //     if (!identity) throw new Error("Unauthorized");
-  
-  //     // Find the room by roomId
-  //     const room = await ctx.db.query("rooms")
-  //       .withIndex("byRoomId", q => q.eq("roomId", args.roomId))
-  //       .unique();
-  
-  //     if (!room) throw new Error("Room not found");
-  //     if (room.participants.includes(identity.subject)) {
-  //       throw new Error("Already in room");
-  //     }
-  
-  //     // Update participants list
-  //     await ctx.db.patch(room._id, {
-  //       participants: [...room.participants, identity.subject],
-  //       updatedAt: Date.now()
-  //     });
-  
-  //     return room.roomId; // Return the room's Convex document ID
-  //   }
-  // });
+export const joinRoom = mutation({
+  args: {
+    roomId: v.string()
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    // Find the room by roomId
+    const room = await ctx.db.query("rooms")
+      .withIndex("byRoomId", q => q.eq("roomId", args.roomId))
+      .unique();
+
+    if (!room) throw new Error("Room not found");
+    console.log("room", room);
+    console.log("identity", identity);
+    if ((room.participants?.length ?? 0) >= (room.settings.maxParticipants ?? Infinity)) {
+      throw new Error("Room is full");
+    }
+    if (room.status !== "waiting") {
+      throw new Error("Room is not accepting participants");
+    }
+    if (room.participants?.some(participant => participant.userId === identity.subject)) {
+      return room.roomId; // Return the room's Convex document ID
+    }
+    // Add the user to the participants list
+    await ctx.db.patch(room._id, {
+      participants: [...(room.participants ?? []), {
+        userId: identity.subject,
+        imageUrl: identity.pictureUrl || "",
+        email: identity.email || "",
+        name: identity.name || "Unknown",
+        score: 0,
+        status: "ready",
+        answers: []
+      }],
+    });
+    return room.roomId; // Return the room's Convex document ID
+  }
+});
+
+export const leaveRoom = mutation({
+  args: {
+    roomId: v.string()
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    // Find the room by roomId
+    const room = await ctx.db.query("rooms")
+      .withIndex("byRoomId", q => q.eq("roomId", args.roomId))
+      .unique();
+
+    if (!room) throw new Error("Room not found");
+
+    // Remove the user from the participants list
+    const updatedParticipants = room.participants?.filter(participant => participant.userId !== identity.subject) ?? [];
+
+    await ctx.db.patch(room._id, {
+      participants: updatedParticipants,
+    });
+
+    return room.roomId; // Return the room's Convex document ID
+  }
+});
