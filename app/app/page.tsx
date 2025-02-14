@@ -2,11 +2,14 @@ import Link from "next/link"
 import { Card } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Camera, FileText, File, ChevronRight } from "lucide-react"
+import CreateRoomButton from "@/components/CreateRoomButton"
+import JoinRoomButton from "@/components/JoinRoom"
 
-export default function Home() {
+export default function HomePage() {
     return (
         <div className="min-h-screen pb-20">
-            {" "}
+          <CreateRoomButton/>
+            <JoinRoomButton/>
             {/* Added pb-20 to account for the fixed nav */}
             {/* Header */}
             <header className="p-6 pb-2">

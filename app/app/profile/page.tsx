@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { SignOutButton } from "@clerk/nextjs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,15 +10,16 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
 export default function ProfilePage() {
-    const { user, isSignedIn, isLoaded } = useUser()
+    const { user, isSignedIn, isLoaded } = useUser();
 
-
-    const userDetails = useQuery(api.user.getUser, { clerkId: user?.id! })
+    // Ensure user is loaded and has an id before making the query
+    const userDetails = isLoaded && user?.id ? useQuery(api.user.getUser, { clerkId: user.id }) : null;
 
     if (!isSignedIn || !isLoaded) {
         return null;
     }
-    console.log(userDetails)
+
+    console.log(userDetails);
 
     return (
         <div className="min-h-screen bg-black text-white">
@@ -77,11 +79,16 @@ export default function ProfilePage() {
                     </Button>
                 </div>
 
-                {/* Logout Button */}
-                <Button className="w-full bg-[#1E1E1E] hover:bg-[#2C2C2C] text-[#FF4444] hover:text-[#FF6666] h-14">
-                    <LogOut className="w-5 h-5 mr-3" />
-                    Logout
-                </Button>
+                <SignOutButton >
+                    <Button
+                        className="w-full bg-gray-700 hover:bg-gray-600 text-white border-none"
+                        variant="outline"
+                        size="lg"
+                        // onClick={() => window.location.href = "/"}
+                    >
+                        Logout
+                    </Button>
+                </SignOutButton>
 
                 {/* Bottom Navigation */}
                 <nav className="fixed bottom-0 left-0 right-0 bg-[#1E1E1E] border-t border-[#333333] p-4">
