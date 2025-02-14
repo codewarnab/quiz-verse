@@ -35,7 +35,7 @@ export default function HomePage() {
                     </Card>
 
                     <Card className="bg-[#4CAF50] hover:bg-[#45a049] transition-colors cursor-pointer border-0">
-                        <Link href="#" className="block p-6">
+                        <Link href="/app/upload" className="block p-6">
                             <div className="flex justify-between items-center">
                                 <div>
                                     <h3 className="text-2xl font-bold mb-2">Photo</h3>
@@ -46,8 +46,9 @@ export default function HomePage() {
                         </Link>
                     </Card>
 
+                        
                     <Card className="bg-[#4CAF50] hover:bg-[#45a049] transition-colors cursor-pointer border-0">
-                        <Link href="#" className="block p-6">
+                        <Link href="/app/upload" className="block p-6">
                             <div className="flex justify-between items-center">
                                 <div>
                                     <h3 className="text-2xl font-bold mb-2">PDF</h3>
