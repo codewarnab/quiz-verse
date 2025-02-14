@@ -13,7 +13,7 @@ export default function ProfilePage() {
     const { user, isSignedIn, isLoaded } = useUser();
 
     // Ensure user is loaded and has an id before making the query
-    const userDetails = isLoaded && user?.id ? useQuery(api.user.getUser, { clerkId: user.id }) : null;
+    const userDetails = useQuery(api.user.getUser, user?.id ? { clerkId: user.id } : "skip");
 
     if (!isSignedIn || !isLoaded) {
         return null;

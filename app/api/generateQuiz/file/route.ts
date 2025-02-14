@@ -1,123 +1,71 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from "next/server";
-import { generateText, generateObject } from "ai";
-import { google } from "@ai-sdk/google";
-import fs from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
-import { z } from "zod";
-import { systemMessage, QUIZ_GENERATION_SYSTEM_MESSAGE } from "./utils/systemMessage";
-import { processedschema, quizSchema } from "./utils/schema";
+import { auth } from "@clerk/nextjs/server";
+import { api } from "@/convex/_generated/api";
+import { fetchMutation, fetchQuery } from "convex/nextjs";
+import { reqTtype } from "../utils/types";
+import {
+    canBeProcessedOrNotImage,
+    canBeProcessedOrNotFile,
+    generateQuizQuestionsImage,
+    generateQuizQuestionsFile
+} from "../utils/functions";
 
-export async function GET() {
-    // Resolve file paths relative to this module.
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = dirname(__filename);
-    const imagePath = join(__dirname, "image.jpg");
-    const markdownPath = join(__dirname, "document.md");
-    const pdfPath = join(__dirname, "document.pdf");
+export async function POST(request: NextRequest) {
+    // Authenticate the user.
+    const { userId } = await auth();
+    if (!userId) {
+        return new NextResponse("Unauthorized", { status: 401 });
+    }
 
-    // Process all files.
-    const imageResult = await processFile(imagePath);
-    const markdownResult = await processFile(markdownPath);
-    const pdfResult = await processFile(pdfPath);
+    // Update status: received request and check tokens.
+    await fetchMutation(api.user.updateQuizgenStatus, { clerkId: userId, status: "Received Request" });
+    await fetchMutation(api.user.updateQuizgenStatus, { clerkId: userId, status: "Checking Available Tokens" });
 
-    console.log({ imageResult, markdownResult, pdfResult });
+    const hasEnoughTokens = await fetchQuery(api.user.hasEnoughTokens, { clerkId: userId, tokens: 1 });
+    if (!hasEnoughTokens) {
+        return new NextResponse("Insufficient tokens", { status: 400 });
+    }
+
+    // Parse the request body and ensure at least one file is provided.
+    const files: reqTtype[] = await request.json();
+    if (!files.length) {
+        return new NextResponse("No files provided", { status: 400 });
+    }
+
+    // Process only the first file.
+    const file = files[0];
+    let processableResult;
+    if (file.mimeType.startsWith("image/")) {
+        processableResult = await canBeProcessedOrNotImage(file.url, file.extension, file.mimeType, userId);
+    } else {
+        processableResult = await canBeProcessedOrNotFile(file.url, file.extension, file.mimeType, userId);
+    }
+
+    if (!processableResult.canBeProcessedOrNot) {
+        await fetchMutation(api.user.updateQuizgenStatus, { clerkId: userId, status: "File Processing Failed" });
+        return new NextResponse("File cannot be processed", { status: 200 });
+    }
+
+    // Update status to indicate that file processing succeeded.
+    await fetchMutation(api.user.updateQuizgenStatus, { clerkId: userId, status: "Processing File" });
+
+    // Generate quiz questions based on the file type.
+    let quizResult;
+    if (file.mimeType.startsWith("image/")) {
+        quizResult = await generateQuizQuestionsImage(file.url, file.extension, file.mimeType, userId);
+    } else {
+        quizResult = await generateQuizQuestionsFile(file.url, file.extension, file.mimeType, userId);
+    }
+
+    // Update final status.
+    await fetchMutation(api.user.updateQuizgenStatus, { clerkId: userId, status: "Quiz Generated" });
 
     return NextResponse.json({
         message: "Data received",
-        result: { image: imageResult, markdown: markdownResult, pdf: pdfResult },
+        result: {
+            fileName: file.fileName,
+            processable: processableResult,
+            quiz: quizResult,
+        },
     });
-}
-
-async function canBeProcessedOrNot(
-    fileData: any,
-    fileType: string,
-    mimeType: string
-) {
-    const { object } = await generateObject({
-        model: google("gemini-1.5-flash"),
-        system: systemMessage,
-        schema: processedschema,
-        messages: [
-            {
-                role: "user",
-                content: [
-                    {
-                        type: "text",
-                        text: `can this ${fileType} file be processed for generating mcq questions?`,
-                    },
-                    {
-                        type: "file",
-                        data: fileData,
-                        mimeType: mimeType,
-                    },
-                ],
-            },
-        ],
-    });
-
-    return object;
-}
-
-// New helper function to generate MCQ questions if the file can be processed.
-async function generateQuizQuestions(fileData: any, fileType: string, mimeType: string) {
-    const { object } = await generateObject({
-        model: google("gemini-1.5-flash"),
-        system: QUIZ_GENERATION_SYSTEM_MESSAGE,
-        schema: quizSchema,
-        messages: [
-            {
-                role: "user",
-                content: [
-                    {
-                        type: "text",
-                        text: `Generate MCQ questions based on this ${fileType} file.`,
-                    },
-                    {
-                        type: "file",
-                        data: fileData,
-                        mimeType: mimeType,
-                    },
-                ],
-            },
-        ],
-    });
-    return object;
-}
-
-// Wrapper function that determines the fileType and mimeType based on the file extension.
-async function processFile(filePath: string) {
-    // Read the file data.
-    const fileData = fs.readFileSync(filePath);
-
-    // Determine the file extension.
-    const extension = filePath.split(".").pop()?.toLowerCase();
-    let fileType: string;
-    let mimeType: string;
-
-    if (extension === "jpg" || extension === "jpeg" || extension === "png") {
-        fileType = "image";
-        mimeType = extension === "png" ? "image/png" : "image/jpeg";
-    } else if (extension === "md") {
-        fileType = "markdown";
-        mimeType = "text/markdown";
-    } else if (extension === "pdf") {
-        fileType = "pdf";
-        mimeType = "application/pdf";
-    } else {
-        throw new Error("Unsupported file type");
-    }
-
-    // Check if the file can be processed.
-    const processableResult = await canBeProcessedOrNot(fileData, fileType, mimeType);
-
-    // If the file can be processed, generate MCQ questions.
-    if (processableResult.canBeProcessedOrNot) {
-        const quizResult = await generateQuizQuestions(fileData, fileType, mimeType);
-        console.log("Quiz Generation Result:", quizResult);
-        return { ...processableResult, quiz: quizResult };
-    }
-
-    return processableResult;
 }

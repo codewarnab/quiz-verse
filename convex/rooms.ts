@@ -1,5 +1,5 @@
 import { mutation } from "./_generated/server";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { query } from "./_generated/server";
 
 
@@ -28,7 +28,7 @@ export const createRoom = mutation({
   handler: async (ctx, args) => {
     // Get the current user (assuming authentication is set up)
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Unauthorized");
+    if (!identity) throw new ConvexError("Unauthorized");
 
     console.log("identity", identity);
     // Generate a unique ID for the room

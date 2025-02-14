@@ -14,37 +14,49 @@ import { CloudUploadIcon, Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEdgeStore } from "@/lib/edgestore";
 import { useState } from "react";
+import { useUser } from "@clerk/clerk-react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 interface UploadedFile {
     url: string;
     size: number;
     fileName: string;
     extension: string;
+    mimeType: string;
 }
 
 export default function QuizUpload() {
     const { edgestore } = useEdgeStore();
     const [filesArray, setFilesArray] = useState<UploadedFile[]>([]);
     console.log(filesArray);
+    const { user } = useUser();
+    const userDetails = useQuery(
+        api.user.getUser,
+        user?.id ? { clerkId: user.id } : "skip"
+    );
 
     const dropzone = useDropzone({
         onDropFile: async (file: File) => {
             const res = await edgestore.publicFiles.upload({ file });
             // Extract file extension from file name
             const extension = file.name.split(".").pop() || "";
-            // Update filesArray with an object instead of just the URL
-            setFilesArray(prev => [
+            // Update filesArray with an object including mimeType from file.type
+            setFilesArray((prev) => [
                 ...prev,
                 {
                     url: res.url,
                     size: res.size,
                     fileName: file.name,
                     extension,
+                    mimeType: file.type,
                 },
             ]);
             return {
                 status: "success",
-                result: file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
+                result: file.type.startsWith("image/")
+                    ? URL.createObjectURL(file)
+                    : null,
             };
         },
         validation: {
@@ -57,13 +69,17 @@ export default function QuizUpload() {
         },
     });
 
+    if (!userDetails) {
+        return <div>Loading user details...</div>;
+    }
+
     const hasFiles = dropzone.fileStatuses.length > 0;
 
     return (
         <div className="flex flex-col items-center min-h-screen bg-zinc-900 py-8 pt-10">
             <div className="container bg-zinc-900 mx-auto max-w-6xl px-4 flex flex-col gap-8">
                 {/* Big heading at the top */}
-                <h1 className="md:text-4xl text-2xl  font-bold text-white">
+                <h1 className="md:text-4xl text-2xl font-bold text-white">
                     Upload one or more files for creating a quiz
                 </h1>
 
@@ -113,9 +129,14 @@ export default function QuizUpload() {
                                 )}
                                 <div className="flex items-center justify-between p-2 pl-4">
                                     <div className="min-w-0">
-                                        <p className="truncate text-sm text-white">{file.fileName}</p>
+                                        <p className="truncate text-sm text-white">
+                                            {file.fileName}
+                                        </p>
                                         <p className="text-xs text-gray-400">
                                             {(file.file.size / (1024 * 1024)).toFixed(2)} MB
+                                        </p>
+                                        <p className="text-xs text-gray-400">
+                                            {file.file.type} {/* Displaying mimeType from file.type */}
                                         </p>
                                     </div>
                                     <DropzoneRemoveFile
@@ -133,8 +154,15 @@ export default function QuizUpload() {
                 {hasFiles && (
                     <Button
                         className="bg-[#4CAF50] hover:bg-[#45a049] text-white text-xl py-6 w-full max-w-xl mx-auto mt-8"
+                        disabled={
+                            dropzone.fileStatuses.some((file) => file.status === "pending") ||
+                            userDetails.quizgenStatus !== "Idle"
+                        }
                         onClick={() => console.log("Create Quiz clicked")}
                     >
+                        {userDetails.quizgenStatus === "Idle"
+                            ? "Create Quiz"
+                            : userDetails.quizgenStatus}
                         Create Quiz
                     </Button>
                 )}

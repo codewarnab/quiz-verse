@@ -50,7 +50,9 @@ const handler = httpAction(async (ctx, req) => {
                 email: event.data.email_addresses[0].email_address,
                 clerkId: event.data.id,
                 imageUrl: event.data.image_url,
-                role: "student"
+                role: "student",
+                tokens: 100,
+                quizgenStatus: "Idle"
             });
 
             break;
