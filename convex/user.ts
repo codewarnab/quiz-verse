@@ -59,8 +59,6 @@ export const addJoinedRoom = mutation({
     },
 
     async handler(ctx, { clerkId, roomId }) {
-        const identity = await ctx.auth.getUserIdentity();
-        if (!identity) throw new ConvexError("Unauthorized");
         const user = await ctx.db
             .query("users")
             .withIndex("by_clerkId", q => q.eq('clerkId', clerkId))
@@ -79,14 +77,12 @@ export const addJoinedRoom = mutation({
 })
 
 
-export const addQuiz = mutation({
+export const addQuiz = internalMutation({
     args: {
         clerkId: v.string(),
         quizId: v.string()
     },
     async handler(ctx, { clerkId, quizId }) {
-        const identity = await ctx.auth.getUserIdentity();
-        if (!identity) throw new ConvexError("Unauthorized");
         const user = await ctx.db
             .query("users")
             .withIndex("by_clerkId", q => q.eq('clerkId', clerkId))
@@ -110,9 +106,6 @@ export const deductToken = mutation({
         tokens: v.number()
     },
     async handler(ctx, { clerkId, tokens }) {
-        const identity = await ctx.auth.getUserIdentity();
-        if (!identity) throw new ConvexError("Unauthorized");
-
         const user = await ctx.db
             .query("users")
             .withIndex("by_clerkId", q => q.eq('clerkId', clerkId))
@@ -150,11 +143,10 @@ export const updateQuizgenStatus = mutation({
             v.literal("Generating Quiz"),
             v.literal("Quiz Generated"),
             v.literal("Quiz Generation Failed"),
+            v.literal("Syncing With Database"),
         ),
     },
     async handler(ctx, { clerkId, status }) {
-        const identity = await ctx.auth.getUserIdentity();
-        if (!identity) throw new ConvexError("Unauthorized");
         const user = await ctx.db
             .query("users")
             .withIndex("by_clerkId", q => q.eq('clerkId', clerkId))

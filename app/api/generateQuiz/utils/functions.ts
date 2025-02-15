@@ -7,6 +7,7 @@ import { processedschema } from "../utils/schema";
 import { z } from "zod";
 import { QUIZ_GENERATION_SYSTEM_MESSAGE } from "../utils/systemMessage";
 import { quizSchema } from "../utils/schema";
+import { reqTtype } from "./types";
 
 // Inferred type from your schema.
 export type ProcessedResult = z.infer<typeof processedschema>;
@@ -168,5 +169,38 @@ export async function generateQuizQuestionsImage(
     } catch (error) {
         console.error("Error generating quiz questions for image:", error);
         throw error;
+    }
+}
+
+
+export async function syncToConvex(quizResult: QuizResult, clerkId: string, files: reqTtype | reqTtype[]): Promise<boolean> {
+    try {
+        // Convert single file to array if necessary
+        const fileArray = Array.isArray(files) ? files : [files];
+
+        const res = await fetchMutation(api.quizes.create, {
+            createdBy: clerkId,
+            givenfiles: fileArray.map(file => ({
+                url: file.url,
+                size: file.size,
+                fileName: file.fileName,
+                extension: file.extension,
+            })),
+            title: quizResult.title,
+            description: quizResult.description,
+            category: quizResult.category,
+            difficulty: quizResult.difficulty,
+            timeLimit: quizResult.timeLimit,
+            instructions: quizResult.instructions,
+            numberOfQuestions: quizResult.numberOfQuestions,
+            questions: quizResult.questions,
+            createdAt: Date.now(),
+        });
+        console.log(res);
+        return true;
+
+    } catch (error) {
+        console.error("Error syncing quiz result to Convex:", error);
+        return false;
     }
 }

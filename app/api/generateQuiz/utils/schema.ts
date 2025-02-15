@@ -22,8 +22,7 @@ export const quizSchema = z.object({
             correctAnswer: z.string().describe("The correct answer to the question"),
             explanation: z.string().describe("A short explanation for the correct answer"),
             points: z.number().optional().describe("Points awarded for a correct answer"),
-            hint: z.string().optional().describe("A hint to help answer the question"),
-            mediaUrl: z.string().optional().describe("URL for an image or video related to the question"),
+            hint: z.string().optional().describe("A short hint to help answer the question"),
         })
     ).describe("The generated MCQ questions"),
 

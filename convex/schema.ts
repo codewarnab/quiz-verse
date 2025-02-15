@@ -23,7 +23,8 @@ export default defineSchema({
       v.literal("Generating Quiz"),
       v.literal("Quiz Generated"),
       v.literal("Quiz Generation Failed"),
-      
+      v.literal("Syncing With Database"),
+
     )),
   })
     .index("by_email", ["email"])
@@ -104,12 +105,12 @@ export default defineSchema({
 
   quizes: defineTable({
     createdBy: v.string(),
-    givenfile: v.object({
+    givenfiles: v.array(v.object({
       url: v.string(),
       size: v.number(),
       fileName: v.string(),
       extension: v.string(),
-    }),
+    })),
     title: v.string(),
     description: v.optional(v.string()),
     category: v.optional(v.string()),
@@ -131,7 +132,6 @@ export default defineSchema({
         explanation: v.string(),
         points: v.optional(v.number()),
         hint: v.optional(v.string()),
-        mediaUrl: v.optional(v.string()),
       })
     ),
     createdAt: v.number(), // Timestamp when quiz was created

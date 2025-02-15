@@ -34,8 +34,9 @@ export default function QuizUpload() {
     const userDetails = useQuery(
         api.user.getUser,
         user?.id ? { clerkId: user.id } : "skip"
-    );
 
+    );
+    console.log(userDetails)
     const dropzone = useDropzone({
         onDropFile: async (file: File) => {
             const res = await edgestore.publicFiles.upload({ file });
@@ -68,6 +69,22 @@ export default function QuizUpload() {
             maxFiles: 10,
         },
     });
+
+    async function handleCreateQuiz() {
+        try {
+            const response = await fetch("/api/generateQuiz/file", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(filesArray),
+            });
+            const data = await response.json();
+            console.log("Quiz created:", data);
+        } catch (error) {
+            console.error("Error creating quiz:", error);
+        }
+    }
 
     if (!userDetails) {
         return <div>Loading user details...</div>;
@@ -156,14 +173,15 @@ export default function QuizUpload() {
                         className="bg-[#4CAF50] hover:bg-[#45a049] text-white text-xl py-6 w-full max-w-xl mx-auto mt-8"
                         disabled={
                             dropzone.fileStatuses.some((file) => file.status === "pending") ||
-                            userDetails.quizgenStatus !== "Idle"
+                            (userDetails.quizgenStatus !== "Idle" && userDetails.quizgenStatus !== "")
                         }
-                        onClick={() => console.log("Create Quiz clicked")}
+                        onClick={handleCreateQuiz}
                     >
-                        {userDetails.quizgenStatus === "Idle"
+                        {dropzone.fileStatuses.some((file) => file.status === "pending")
+                            ? "Uploading..."
+                            : userDetails.quizgenStatus === "Idle"
                             ? "Create Quiz"
                             : userDetails.quizgenStatus}
-                        Create Quiz
                     </Button>
                 )}
             </div>

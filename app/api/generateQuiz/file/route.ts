@@ -7,7 +7,8 @@ import {
     canBeProcessedOrNotImage,
     canBeProcessedOrNotFile,
     generateQuizQuestionsImage,
-    generateQuizQuestionsFile
+    generateQuizQuestionsFile,
+    syncToConvex
 } from "../utils/functions";
 
 export async function POST(request: NextRequest) {
@@ -60,6 +61,18 @@ export async function POST(request: NextRequest) {
     // Update final status.
     await fetchMutation(api.user.updateQuizgenStatus, { clerkId: userId, status: "Quiz Generated" });
 
+    await fetchMutation(api.user.updateQuizgenStatus, {
+        clerkId: userId,
+        status: "Syncing With Database"
+    });
+
+    const sucess = await syncToConvex(quizResult, userId, file);
+    if (!sucess) {
+        return new NextResponse("Error syncing with database", { status: 500 });
+    }
+
+
+    await fetchMutation(api.user.updateQuizgenStatus, { clerkId: userId, status: "Idle" });
     return NextResponse.json({
         message: "Data received",
         result: {
@@ -68,4 +81,5 @@ export async function POST(request: NextRequest) {
             quiz: quizResult,
         },
     });
+
 }
