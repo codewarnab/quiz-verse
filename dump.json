@@ -1,0 +1,53 @@
+{
+    "message": "Data received",
+    "result": {
+        "fileName": "RCC Institute of Information Technology Mail - Fwd_ Regarding ACM Student Chapter event.pdf",
+        "processable": {
+            "canBeProcessedOrNot": true
+        },
+        "quiz": {
+            "title": "ACM Student Chapter Event Quiz",
+            "description": "A short quiz based on the email regarding the ACM Student Chapter event.",
+            "category": "Student Events",
+            "difficulty": "easy",
+            "timeLimit": 60,
+            "instructions": "Choose the best answer for each multiple-choice question.",
+            "numberOfQuestions": 3,
+            "questions": [
+                {
+                    "question": "According to the email, what time will the registration process for the ACM Student Chapter event begin?",
+                    "options": [
+                        "1:00 PM",
+                        "12:30 PM",
+                        "11:00 AM",
+                        "1:30 PM"
+                    ],
+                    "correctAnswer": "12:30 PM",
+                    "explanation": "The email explicitly states that the registration process will begin after 12:30 PM to avoid disrupting the first-half classes."
+                },
+                {
+                    "question": "At present, which departments' students are the active members of the ACM student chapter?",
+                    "options": [
+                        "CSE, IT, BCA",
+                        "CSE, IT, CSE (AI & ML), BCA, MCA",
+                        "Only CSE",
+                        "Only IT"
+                    ],
+                    "correctAnswer": "CSE and IT",
+                    "explanation": "The email clearly mentions that students from CSE and IT are the active members of the ACM student chapter."
+                },
+                {
+                    "question": "Is attendance at the ACM Student Chapter event mandatory for all students?",
+                    "options": [
+                        "Mandatory for all students",
+                        "Optional for all students",
+                        "Mandatory for CS students only",
+                        "Optional for non-CS students"
+                    ],
+                    "correctAnswer": "Optional for non-CS students",
+                    "explanation": "The email specifies that attendance is mandatory for CSE students but optional for others.  Non-CS students who don't attend will continue with their regular schedule."
+                }
+            ]
+        }
+    }
+}
