@@ -25,6 +25,6 @@ export default function Timer({ duration, onTimerEnd }: TimerProps) {
     }
   }, [timeLeft, onTimerEnd])
 
-  return <div className="text-2xl font-bold mb-4 text-sky-700">Time left: {timeLeft} seconds</div>
+  return <div className="text-xl font-bold mb-4 text-zinc-400">Time left: {timeLeft} seconds</div>
 }
 
