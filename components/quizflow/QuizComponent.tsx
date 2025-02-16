@@ -27,7 +27,6 @@ export default function QuizComponent() {
   }, [])
 
   const fetchQuestions = async () => {
-    // In a real application, this would be an API call
     const dummyQuestions: Question[] = [
       {
         id: 1,
@@ -77,7 +76,7 @@ export default function QuizComponent() {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1)
       setSelectedAnswer(null)
-      setTimerKey((prevKey) => prevKey + 1) // Reset timer
+      setTimerKey((prevKey) => prevKey + 1)
     } else {
       setQuizComplete(true)
     }
@@ -91,7 +90,11 @@ export default function QuizComponent() {
   }
 
   if (isLoading) {
-    return <div>Loading questions...</div>
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-green-500" />
+      </div>
+    )
   }
 
   if (quizComplete) {
@@ -101,17 +104,17 @@ export default function QuizComponent() {
   }
 
   return (
-    <div className="w-full max-w-2xl">
+    <div className="w-full max-w-2xl mx-auto">
       <Timer key={timerKey} duration={50} onTimerEnd={handleTimerEnd} />
-      <QuestionDisplay 
+      <QuestionDisplay
         question={questions[currentQuestionIndex]}
         selectedAnswer={selectedAnswer}
         setSelectedAnswer={setSelectedAnswer}
         onSubmit={handleSubmit}
       />
-      <div className="mt-4 text-center">
-        <span className="text-green-600 font-bold mr-4">Correct: {correctAnswers}</span>
-        <span className="text-red-600 font-bold">Wrong: {wrongAnswers}</span>
+      <div className="mt-4 text-center space-x-4">
+        <span className="text-green-500">Correct: {correctAnswers}</span>
+        <span className="text-red-500">Wrong: {wrongAnswers}</span>
       </div>
     </div>
   )
