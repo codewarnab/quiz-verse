@@ -5,14 +5,15 @@ import { internal } from "./_generated/api";
 export const create = mutation({
     args: {
         createdBy: v.string(),
-        givenfiles: v.array(
+        givenfiles: v.optional(v.array(
             v.object({
                 url: v.string(),
                 size: v.number(),
                 fileName: v.string(),
                 extension: v.string(),
             })
-        ),
+        )),
+        givenUrl: v.optional(v.array(v.string())),
         title: v.string(),
         description: v.optional(v.string()),
         category: v.optional(v.string()),
@@ -35,7 +36,7 @@ export const create = mutation({
         createdAt: v.number(),
     },
     async handler(ctx, args) {
-        
+
         const quizId = await ctx.db.insert("quizes", args);
         await ctx.runMutation(internal.user.addQuiz, {
             clerkId: args.createdBy,

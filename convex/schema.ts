@@ -105,12 +105,13 @@ export default defineSchema({
 
   quizes: defineTable({
     createdBy: v.string(),
-    givenfiles: v.array(v.object({
+    givenfiles: v.optional(v.array(v.object({
       url: v.string(),
       size: v.number(),
       fileName: v.string(),
       extension: v.string(),
-    })),
+    }))),
+    givenUrl: v.optional(v.array(v.string())),
     title: v.string(),
     description: v.optional(v.string()),
     category: v.optional(v.string()),
