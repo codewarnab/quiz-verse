@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button"
 
 interface QuestionProps {
   question: {
-    id: number
     question: string
     options: string[]
     correctAnswer: string
