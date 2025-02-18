@@ -34,8 +34,6 @@ export default defineSchema({
 
     // ROOM SCHEMA
   rooms: defineTable({
-    // TODO: Remove teh name field
-    // name: v.optional(v.string()),
     status: v.union(
       v.literal("waiting"),
       v.literal("in-progress"),

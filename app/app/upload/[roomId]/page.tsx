@@ -17,7 +17,7 @@ import { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import QuizPreview from "@/components/QuizPreview";
+import QuizPreview from "@/components/Room Components/QuizPreview";
 
 interface UploadedFile {
   url: string;
@@ -159,7 +159,8 @@ if(filesArray)
     </div>
   );
 }
-// TODO: add realtime status as previous opne
-
-
-// TODO: update teh room schema to include a quiz field--> show preview of teh quiz in the room page and `thsi page as well`
+// TODO: add realtime status in button as previous opne
+// TODO: give all buttons better and relevant label 
+//  TODO: Maybe remove room from db  once host leaves, and all participants must be notified and kiscked out 
+// TODO: REPLACE ALL IMG TAG WITH NEXT IMAGE
+// TODO:  gamify teh quiz, handle points, leaderboard, etc

@@ -6,6 +6,7 @@ import { useMutation } from 'convex/react';
 import { api } from "@/convex/_generated/api";
 import { useParams } from "next/navigation";
 import RoomSettingsForm from './RoomSettingsForm';
+import { useRouter } from "next/navigation"
 interface QuizData {
     title: string;
     description: string;
@@ -33,6 +34,7 @@ interface QuizPreviewProps {
 }
 
 const MobileQuizPreview: React.FC<QuizPreviewProps> = ({ quiz, filesArray }) => {
+    const router = useRouter();
     const [showInstructions, setShowInstructions] = useState(false);
     const [showSample, setShowSample] = useState(false);
     const { roomId } = useParams();
@@ -79,10 +81,13 @@ const MobileQuizPreview: React.FC<QuizPreviewProps> = ({ quiz, filesArray }) => 
                 title: quiz.title,
                 description: quiz.description,
                 numberOfQuestions: quiz.numberOfQuestions,
-                questions: quiz.questions.map(({ correctAnswer, explanation, ...rest }) => ({
-                    ...rest,
-                    correctAnswer,
-                    explanation
+                questions: quiz.questions.map((question) => ({
+                    question: question.question,
+                    options: question.options,
+                    correctAnswer: question.correctAnswer,
+                    explanation: question.explanation,
+                    points: 1,
+                    timeLimit: quiz.timeLimit
                 }))
             },
             settings: {
@@ -92,6 +97,12 @@ const MobileQuizPreview: React.FC<QuizPreviewProps> = ({ quiz, filesArray }) => 
             }
         });
         console.log(newRoomId);
+        if(newRoomId === roomId){
+            console.log("Redirecting to waiting room");
+            router.push(`/app/waiting/${roomId}`);
+        } else {
+            console.error("Failed to start quiz, room ID mismatch");
+        }
     }
 
     const handleStartQuizClick = () => {
@@ -196,36 +207,3 @@ const MobileQuizPreview: React.FC<QuizPreviewProps> = ({ quiz, filesArray }) => 
 };
 
 export default MobileQuizPreview;
-
-// start quiz, 
-{/*
-1. mutate teh schema of the room   ---> 
-
-givenfiles: v.optional(v.array(v.object({
-      url: v.string(),
-      size: v.number(),
-      fileName: v.string(),
-      extension: v.string(),
-    }))),   ---->  
-    
-    quiz: v.object({
-          title: v.string(),
-          description: v.optional(v.string()),
-          numberOfQuestions: v.number(),
-          questions: v.array(
-            v.object({
-              question: v.string(),
-              options: v.array(v.string()),
-              correctAnswer: v.string(),
-              explanation: v.string(),
-              points: v.optional(v.number()),
-              timeLimit: v.optional(v.number()),
-            })
-          ),
-        }),
-
-ROOM SCHEMA READY , NOW GO LIVE (WAITING AREA--->)
-2. In the wiating area, dispaly the quiz preview, blah blah...
-*/}
-
-// STATUS : IN_PROGRESS

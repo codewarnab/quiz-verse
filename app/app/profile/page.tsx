@@ -4,7 +4,7 @@ import { SignOutButton } from "@clerk/nextjs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Home, User, ChevronRight, BookmarkIcon, HelpCircle, LogOut } from "lucide-react";
+import { Home, User, ChevronRight, BookmarkIcon, HelpCircle} from "lucide-react";
 import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";

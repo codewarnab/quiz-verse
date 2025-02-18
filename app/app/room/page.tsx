@@ -1,7 +1,7 @@
 import React from 'react';
 
-import CreateRoomButton from "@/components/CreateRoomButton";
-import JoinRoomButton from "@/components/JoinRoom";
+import CreateRoomButton from "@/components/Room Components/CreateRoomButton";
+import JoinRoomButton from "@/components/Room Components/JoinRoom";
 
 const page = () => {
   return (
