@@ -40,12 +40,13 @@ export default defineSchema({
       v.literal("in-progress"),
       v.literal("completed"),
     ),
-    // givenfile: v.object({
-    //   url: v.string(),
-    //   size: v.number(),
-    //   fileName: v.string(),
-    //   extension: v.string(),
-    // }),
+    givenfiles: v.optional(v.array(v.object({
+      url: v.string(),
+      size: v.number(),
+      fileName: v.string(),
+      extension: v.string(),
+    }))),
+    givenUrl: v.optional(v.array(v.string())),
     hostedBy: v.string(),
     hostId: v.string(), // Owner/creator of the room
     roomId: v.string(),
@@ -97,12 +98,6 @@ export default defineSchema({
     .index("byRoomId", ["roomId"])
     .index("byHostId", ["hostId"]),
 
-
-
-
-
-
-
   quizes: defineTable({
     createdBy: v.string(),
     givenfiles: v.optional(v.array(v.object({
@@ -137,12 +132,6 @@ export default defineSchema({
     ),
     createdAt: v.number(), // Timestamp when quiz was created
   }).index("by_creator", ["createdBy"]),
-
-
-
-
-
-
 
   quizAttempts: defineTable({
     userId: v.string(),

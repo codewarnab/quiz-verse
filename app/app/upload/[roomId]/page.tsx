@@ -17,6 +17,8 @@ import { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useParams } from "next/navigation";
+import QuizPreview from "@/components/QuizPreview";
 
 interface UploadedFile {
     url: string;
@@ -27,16 +29,22 @@ interface UploadedFile {
 }
 
 export default function QuizUpload() {
+
+    const { roomId } = useParams();
+    // console.log(roomId);
+
     const { edgestore } = useEdgeStore();
     const [filesArray, setFilesArray] = useState<UploadedFile[]>([]);
-    console.log(filesArray);
+    const [showPreview, setShowPreview] = useState(false);
+    const [quizData, setQuizData] = useState<any>({});
+    // console.log(filesArray);
     const { user } = useUser();
     const userDetails = useQuery(
         api.user.getUser,
         user?.id ? { clerkId: user.id } : "skip"
 
     );
-    console.log(userDetails)
+    // console.log(userDetails)
     const dropzone = useDropzone({
         onDropFile: async (file: File) => {
             const res = await edgestore.publicFiles.upload({ file });
@@ -69,6 +77,7 @@ export default function QuizUpload() {
             maxFiles: 10,
         },
     });
+    
 
     async function handleCreateQuiz() {
         try {
@@ -80,7 +89,9 @@ export default function QuizUpload() {
                 body: JSON.stringify(filesArray),
             });
             const data = await response.json();
-            console.log("Quiz created:", data);
+            setQuizData(data.result.quiz);
+            console.log("Quiz createdAAAAAAA:", data.result.quiz);
+            setShowPreview(true);
         } catch (error) {
             console.error("Error creating quiz:", error);
         }
@@ -92,8 +103,12 @@ export default function QuizUpload() {
 
     const hasFiles = dropzone.fileStatuses.length > 0;
 
+    if(quizData)
+    {
+        console.log(quizData);
+    }
     return (
-        <div className="flex flex-col items-center min-h-screen bg-zinc-900 py-8 pt-10">
+        <div className="flex mb-[85px] flex-col items-center min-h-screen bg-zinc-900 py-8 pt-10">
             <div className="container bg-zinc-900 mx-auto max-w-6xl px-4 flex flex-col gap-8">
                 {/* Big heading at the top */}
                 <h1 className="md:text-4xl text-2xl font-bold text-white">
@@ -104,7 +119,7 @@ export default function QuizUpload() {
                     <div>
                         <div className="flex justify-between">
                             <DropzoneDescription className="text-gray-300">
-                                Drag and drop files here or click to select
+                                Drag and drop files here or click to select ROOMMIIEIES
                             </DropzoneDescription>
                             <DropzoneMessage className="text-gray-300" />
                         </div>
@@ -167,24 +182,33 @@ export default function QuizUpload() {
                         ))}
                     </DropzoneFileList>
                 </Dropzone>
-
+{/* TODO:  fisrt show create quiz the show go live on basis of quizData avaibility */}
                 {hasFiles && (
                     <Button
                         className="bg-[#4CAF50] hover:bg-[#45a049] text-white text-xl py-6 w-full max-w-xl mx-auto mt-8"
                         disabled={
                             dropzone.fileStatuses.some((file) => file.status === "pending") ||
-                            (userDetails.quizgenStatus !== "Idle" && userDetails.quizgenStatus !== undefined)
+                            (userDetails.quizgenStatus !== "Idle" && userDetails?.quizgenStatus !== undefined)
                         }
                         onClick={handleCreateQuiz}
                     >
                         {dropzone.fileStatuses.some((file) => file.status === "pending")
                             ? "Uploading..."
                             : userDetails.quizgenStatus === "Idle"
-                            ? "Create Quiz"
+                            ? "Go Live"
                             : userDetails.quizgenStatus}
                     </Button>
                 )}
+
+                {showPreview && (
+                    <div className="rounded-lg bg-zinc-900 h-fit">
+                        <QuizPreview quiz={quizData} />
+                        </div>)}
             </div>
         </div>
     );
 }
+
+// TODO: update teh room schema to include a quiz field--> show preview of teh quiz in the room page and thsi page as well
+
+// TODO: when clicking deelte reset showPreview

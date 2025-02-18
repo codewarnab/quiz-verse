@@ -57,3 +57,21 @@ export const getQuestions = query(async ({ db }) => {
     
     return quiz.questions;
   });
+
+
+//   export const getQuestions = query({
+//     args: {
+//         createdBy: v.string(),
+//     },
+//     async handler(ctx, args) {
+//         const quiz = await ctx.db
+//             .query("quizes")
+//             .filter(q => q.eq(q.field("createdBy"), args.createdBy))
+//             .order("desc", q => q.field("createdAt"))
+//             .first();
+
+//         if (!quiz) return null;
+
+//         return quiz.questions;
+//     }
+// });
