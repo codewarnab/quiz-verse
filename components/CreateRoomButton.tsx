@@ -1,34 +1,14 @@
 'use client';
-
 import { useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import Link from "next/link";
-import { quizData } from "./SampleQuiz"
 import { useRouter } from "next/navigation";
-import RoomContentUplaod from "./RoomContentUplaod";
 export default function CreateRoomButton() {
   const [roomId, setRoomId] = useState<string | null>(null);
   const createRoom = useMutation(api.rooms.createRoom);
   const router = useRouter();
   const handleCreateRoom = async () => {
-    const newRoomId = await createRoom({
-      name: "Quiz Room Name",
-      quiz: {
-        ...quizData,
-        questions: quizData.questions.map(({ correctAnswer, points = 0, timeLimit = 60, ...rest }) => ({
-          ...rest,
-          correctAnswer,
-          points,
-          timeLimit
-        }))
-      }, // Use SampleQuiz as the quiz argument
-      settings: {
-        maxParticipants: 10,
-        randomizeQuestions: false,
-        waitForAllAnswers: true
-      }
-    });
+    const newRoomId = await createRoom();
     setRoomId(newRoomId);
     router.push(`/app/upload-content/${newRoomId}`);
   };

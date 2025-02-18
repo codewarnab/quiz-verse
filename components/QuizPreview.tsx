@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Clock, BookOpen, BarChart2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-
+import { useMutation } from 'convex/react';
+import { api } from "@/convex/_generated/api";
+import { useParams } from "next/navigation";
+import RoomSettingsForm from './RoomSettingsForm';
 interface QuizData {
     title: string;
     description: string;
-    category: string;
     difficulty: string;
     timeLimit: number;
     instructions: string;
@@ -18,15 +20,91 @@ interface QuizData {
         explanation: string;
     }[];
 }
-
+interface FileArray {
+ url: string;
+ extension:string;
+ fileName:string;
+ size:number;
+ mimeType:string;
+}
 interface QuizPreviewProps {
     quiz: QuizData;
+    filesArray: FileArray[]
 }
 
-const MobileQuizPreview: React.FC<QuizPreviewProps> = ({ quiz }) => {
+const MobileQuizPreview: React.FC<QuizPreviewProps> = ({ quiz, filesArray }) => {
     const [showInstructions, setShowInstructions] = useState(false);
     const [showSample, setShowSample] = useState(false);
+    const { roomId } = useParams();
+    const updateQuizInfoInRoom = useMutation(api.rooms.updateQuizInfoInRoom);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [settings, setSettings] = useState({
+        maxParticipants: 0,
+        randomizeQuestions: false,
+        waitForAllAnswers: false
+    });
 
+    const handleOpenModal = () => {
+        setIsModalOpen(true);
+      };
+
+      const handleCloseModal = () => {
+        setIsModalOpen(false);
+      };
+
+    const handleSubmitSettings = (settings: {
+        maxParticipants?: number;
+        randomizeQuestions?: boolean;
+        waitForAllAnswers?: boolean;
+      }) => {
+        setSettings(prevSettings => ({
+            ...prevSettings,
+            ...settings,
+            maxParticipants: settings.maxParticipants ?? prevSettings.maxParticipants,
+            randomizeQuestions: settings.randomizeQuestions ?? prevSettings.randomizeQuestions,
+            waitForAllAnswers: settings.waitForAllAnswers ?? prevSettings.waitForAllAnswers
+        }));
+        console.log('Settings submitted:', settings);
+    };
+
+    const handleStartingQuiz = async () => {
+        // TODO: handle eror, show a toast before redirection to waiting page
+        // TODO: IMPROVE THE UI, checkOut synctoconvex
+        console.log("Starting Quiz");
+        const newRoomId = await updateQuizInfoInRoom({
+            roomId: String(roomId),
+            givenfiles: filesArray,
+            status: "waiting",
+            quiz: {
+                title: quiz.title,
+                description: quiz.description,
+                numberOfQuestions: quiz.numberOfQuestions,
+                questions: quiz.questions.map(({ correctAnswer, explanation, ...rest }) => ({
+                    ...rest,
+                    correctAnswer,
+                    explanation
+                }))
+            },
+            settings: {
+                maxParticipants: Number(settings.maxParticipants),
+                randomizeQuestions: settings.randomizeQuestions || false,
+                waitForAllAnswers: settings.waitForAllAnswers || false
+            }
+        });
+        console.log(newRoomId);
+    }
+
+    const handleStartQuizClick = () => {
+        if (
+            settings.maxParticipants === 0 &&
+            !settings.randomizeQuestions &&
+            !settings.waitForAllAnswers
+        ) {
+            handleOpenModal();
+        } else {
+            handleStartingQuiz();
+        }
+    };
     return (
         <div className=''>
         <Card className="w-full max-w-md mx-auto bg-zinc-900 text-white">
@@ -56,7 +134,7 @@ const MobileQuizPreview: React.FC<QuizPreviewProps> = ({ quiz }) => {
                 {/* Category */}
                 <div className="bg-zinc-800 px-3 py-2 rounded-lg">
                     <span className="text-sm text-gray-400">Category: </span>
-                    <span className="text-sm text-gray-200">{quiz.category}</span>
+                    {/* <span className="text-sm text-gray-200">{quiz.category}</span> */}
                 </div>
 
                 {/* Collapsible Instructions */}
@@ -103,9 +181,14 @@ const MobileQuizPreview: React.FC<QuizPreviewProps> = ({ quiz }) => {
                 </div>
 
                 {/* Start Button */}
-                <Button className="w-full bg-[#4CAF50] hover:bg-[#45a049] text-white">
+                <Button className="w-full bg-[#4CAF50] hover:bg-[#45a049] text-white" onClick={handleStartQuizClick}>
                     Start Quiz
                 </Button>
+                <RoomSettingsForm
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleSubmitSettings}
+      />
             </CardContent>
         </Card>
         </div>
@@ -113,3 +196,36 @@ const MobileQuizPreview: React.FC<QuizPreviewProps> = ({ quiz }) => {
 };
 
 export default MobileQuizPreview;
+
+// start quiz, 
+{/*
+1. mutate teh schema of the room   ---> 
+
+givenfiles: v.optional(v.array(v.object({
+      url: v.string(),
+      size: v.number(),
+      fileName: v.string(),
+      extension: v.string(),
+    }))),   ---->  
+    
+    quiz: v.object({
+          title: v.string(),
+          description: v.optional(v.string()),
+          numberOfQuestions: v.number(),
+          questions: v.array(
+            v.object({
+              question: v.string(),
+              options: v.array(v.string()),
+              correctAnswer: v.string(),
+              explanation: v.string(),
+              points: v.optional(v.number()),
+              timeLimit: v.optional(v.number()),
+            })
+          ),
+        }),
+
+ROOM SCHEMA READY , NOW GO LIVE (WAITING AREA--->)
+2. In the wiating area, dispaly the quiz preview, blah blah...
+*/}
+
+// STATUS : IN_PROGRESS
