@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Home, User } from "lucide-react"
+import { Home, User, Group } from "lucide-react"
 import type React from "react" 
 
 export default function RootLayout({
@@ -16,6 +16,10 @@ export default function RootLayout({
                         <Link href="/" className="flex flex-col items-center text-white">
                             <Home className="w-6 h-6" />
                             <span className="text-sm mt-1">Home</span>
+                        </Link>
+                        <Link href="/app/room" className="flex flex-col items-center text-gray-400">
+                            <Group className="w-6 h-6" />
+                            <span className="text-sm mt-1">Room</span>
                         </Link>
                         <Link href="/app/profile" className="flex flex-col items-center text-gray-400">
                             <User className="w-6 h-6" />

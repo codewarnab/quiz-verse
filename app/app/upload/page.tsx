@@ -173,7 +173,7 @@ export default function QuizUpload() {
                         className="bg-[#4CAF50] hover:bg-[#45a049] text-white text-xl py-6 w-full max-w-xl mx-auto mt-8"
                         disabled={
                             dropzone.fileStatuses.some((file) => file.status === "pending") ||
-                            (userDetails.quizgenStatus !== "Idle" && userDetails.quizgenStatus !== "")
+                            (userDetails.quizgenStatus !== "Idle" && userDetails.quizgenStatus !== undefined)
                         }
                         onClick={handleCreateQuiz}
                     >
