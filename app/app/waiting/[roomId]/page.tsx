@@ -1,36 +1,61 @@
 "use client";
-import { useParams, useRouter } from "next/navigation";
-import { useQuery,useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+
 import { useEffect, useState } from "react";
-import { Users, Share2, Copy } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-react";
+import { Users, Share2, Copy, Info, Settings } from "lucide-react";
+import RoomInfo from "@/components/Room Components/RoomInfo";
 
 export default function WaitingRoom() {
   const params = useParams();
   const roomId = params.roomId;
-  const [clientRoomId, setClientRoomId] = useState<string | null>(null);
-  const getParticipantsOfRoom = useQuery(api.rooms.getParticipantsInRoom, { roomId: clientRoomId ?? '' });
-  const { user } = useUser();
-  const userDetails = useQuery(api.user.getUser, { clerkId: user?.id ?? '' });
-  const leaveRoom = useMutation(api.rooms.leaveRoom);
   const router = useRouter();
+  const { user } = useUser();
+
+  const [clientRoomId, setClientRoomId] = useState<string | null>(null);
+
+  const getParticipantsOfRoom = useQuery(api.rooms.getParticipantsInRoom, {
+    roomId: clientRoomId ?? "",
+  });
+
+  const userDetails = useQuery(api.user.getUser, {
+    clerkId: user?.id ?? "",
+  });
+
+  const leaveRoom = useMutation(api.rooms.leaveRoom);
+  const updateRoomStatus = useMutation(api.rooms.updateRoomStatus);
+  const room = useQuery(api.rooms.getRoom, { roomId: clientRoomId ?? "" });
 
   useEffect(() => {
-    if (typeof roomId === 'string') {
+    if (typeof roomId === "string") {
       setClientRoomId(roomId);
     }
   }, [roomId]);
 
+  useEffect(() => {
+    if (room && room.status === "in-progress") {
+      if (userDetails && userDetails.role === "teacher") {
+        router.push(`/app/leaderBoard/${clientRoomId}`);
+      } else if (userDetails && userDetails.role === "student") {
+        router.push(`/app/quiz/${clientRoomId}`);
+      }
+    }
+  }, [room]);
+
   const handleLeaveRoom = async () => {
     if (clientRoomId) {
       await leaveRoom({ roomId: clientRoomId });
-      router.push('/'); // Redirect to home or another page
+      router.push("/");
     }
   };
 
-  // Fetch room details using the getRoom query
-  const room = useQuery(api.rooms.getRoom, { roomId: clientRoomId ?? '' });
+  const handleUpdateRoomStatus = async () => {
+    if (clientRoomId) {
+      await updateRoomStatus({ roomId: clientRoomId, status: "in-progress" });
+    }
+  };
 
   const copyRoomId = () => {
     if (clientRoomId) {
@@ -51,14 +76,14 @@ export default function WaitingRoom() {
     spacesLeft = (room.settings.maxParticipants ?? 0) - (room.participants?.length ?? 0);
   }
 
-  console.log("ROOM", room, "PARTICIPANTS", getParticipantsOfRoom);
-
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
       <header className="p-4 border-b border-green-800">
         <h1 className="text-2xl font-bold mb-4">Waiting Room</h1>
-
+        <RoomInfo />
+        <Settings />
+        
         {/* Room Sharing Section */}
         <div className="bg-[#0F1F18] rounded-lg p-3 mb-4">
           <div className="flex items-center gap-2 text-green-400 mb-2">
@@ -69,11 +94,7 @@ export default function WaitingRoom() {
             <div className="bg-[#b8dcb35a] rounded px-3 py-1.5 flex-1 font-mono text-xs overflow-hidden">
               {clientRoomId}
             </div>
-            <button
-              onClick={copyRoomId}
-              className="p-1.5 bg-[#0F1F18] rounded-lg"
-              title="Copy Room ID"
-            >
+            <button onClick={copyRoomId} className="p-1.5 bg-[#0F1F18] rounded-lg" title="Copy Room ID">
               <Copy className="w-4 h-4 text-green-400" />
             </button>
           </div>
@@ -85,15 +106,13 @@ export default function WaitingRoom() {
         {/* Quiz Info */}
         <div className="bg-[#0F1F18] rounded-lg p-4 space-y-3">
           <div>
-            <h2 className="text-xl font-semibold text-green-400">{room.name}</h2>
+            <h2 className="text-xl font-semibold text-green-400">{room.quiz?.description}</h2>
             <p className="text-sm text-gray-400">Hosted by {room.hostedBy}</p>
           </div>
-          {room.quiz.description && (
-            <p className="text-sm text-gray-400">{room.quiz.description}</p>
-          )}
-
+          {room.quiz?.description && <p className="text-sm text-gray-400">{room.quiz.description}</p>}
+          
           {/* Participants Count */}
-          <div className=" bg-[#b8dcb35a] rounded-lg p-3">
+          <div className="bg-[#b8dcb35a] rounded-lg p-3">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2 text-green-400">
                 <Users className="w-4 h-4" />
@@ -101,7 +120,6 @@ export default function WaitingRoom() {
               </div>
               <span className="text-xs text-gray-400">{spacesLeft} spaces left</span>
             </div>
-            {/* Progress bar */}
             <div className="w-full bg-black rounded-full h-1.5">
               <div
                 className="bg-green-400 h-1.5 rounded-full transition-all duration-500"
@@ -118,10 +136,7 @@ export default function WaitingRoom() {
           <h2 className="text-lg font-semibold text-green-400 mb-3">Participants</h2>
           <div className="space-y-2">
             {getParticipantsOfRoom?.map((participant, index) => (
-              <div
-                key={index}
-                className="bg-[#1A1A1A] rounded-lg p-3 flex items-center gap-3"
-              >
+              <div key={index} className="bg-[#1A1A1A] rounded-lg p-3 flex items-center gap-3">
                 <div className="relative">
                   <img
                     src={participant.imageUrl || "/placeholder.svg"}
@@ -129,8 +144,9 @@ export default function WaitingRoom() {
                     className="w-10 h-10 rounded-full object-cover border border-green-400/20"
                   />
                   <div
-                    className={`absolute bottom-0 right-0 w-2 h-2 rounded-full border border-black
-                    ${participant.status === "ready" ? "bg-green-400" : "bg-gray-400"}`}
+                    className={`absolute bottom-0 right-0 w-2 h-2 rounded-full border border-black ${
+                      participant.status === "ready" ? "bg-green-400" : "bg-gray-400"
+                    }`}
                   />
                 </div>
                 <div>
@@ -142,17 +158,14 @@ export default function WaitingRoom() {
           </div>
         </div>
 
-        {/* Waiting message */}
         <p className="text-gray-500 text-sm text-center">Waiting for more..</p>
-
-        {/* Start Quiz Button */}
         {userDetails?.role === "teacher" && (
-          <button className="bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-lg w-full text-sm font-medium">
+          <button className="bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-lg w-full text-sm font-medium" onClick={handleUpdateRoomStatus}>
             Start Quiz
           </button>
         )}
-        {/* Leave Room Button */}
-        <button
+
+<button
         className="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-lg text-sm font-medium absolute top-1 right-4"
         onClick={handleLeaveRoom}
       >

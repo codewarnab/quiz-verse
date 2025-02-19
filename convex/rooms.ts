@@ -81,7 +81,7 @@ export const joinRoom = mutation({
         name: identity.name || "Unknown",
         score: 0,
         status: "ready",
-        answers: []
+        timeToAnswer: [0],
       }],
     });
     return room.roomId; // Return the room's Convex document ID
@@ -165,6 +165,88 @@ export const updateQuizInfoInRoom = mutation({
       quiz: args.quiz,
       givenfiles: args.givenfiles,
       settings: args.settings,
+    });
+
+    return room.roomId; // Return the room's Convex document ID
+  }
+});
+
+export const updateRoomStatus = mutation({
+  args: {
+    roomId: v.string(),
+    status: v.literal("in-progress"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new ConvexError("Unauthorized");
+
+    // Find the room by roomId
+    const room = await ctx.db.query("rooms")
+      .withIndex("byRoomId", q => q.eq("roomId", args.roomId))
+      .unique();
+
+    if (!room) throw new Error("Room not found");
+
+    if (room.hostId !== identity.subject) {
+      throw new Error("Only the host can update the room status");
+    }
+
+    await ctx.db.patch(room._id, {
+      status: args.status,
+    });
+
+    return room.roomId; // Return the room's Convex document ID
+  }
+});
+
+export const getQuizQuetsions = query({
+  args: { roomId: v.string() },
+  handler: async (ctx, args) => {
+    const room = await ctx.db.query("rooms")
+      .withIndex("byRoomId", q => q.eq("roomId", args.roomId))
+      .unique();
+
+    if (!room) throw new Error("Room not found");
+
+    return room.quiz?.questions;
+  }
+});
+
+export const updateParticipant = mutation({
+  args: {
+    roomId: v.string(),
+    status: v.union(
+      v.literal("playing"),
+      v.literal("completed"),
+    ),
+    score: v.optional(v.number()),
+    timeTaken: v.optional(v.array(v.number())),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new ConvexError("Unauthorized");
+
+    // Find the room by roomId
+    const room = await ctx.db.query("rooms")
+      .withIndex("byRoomId", q => q.eq("roomId", args.roomId))
+      .unique();
+
+    if (!room) throw new Error("Room not found");
+
+    const updatedParticipants = room.participants?.map(participant => {
+      if (participant.userId === identity.subject) {
+        return { 
+          ...participant, 
+          status: args.status,
+          score: args.score ?? participant.score,
+          timeToAnswer: args.timeTaken ?? participant.timeToAnswer,
+        };
+      }
+      return participant;
+    }) ?? [];
+
+    await ctx.db.patch(room._id, {
+      participants: updatedParticipants,
     });
 
     return room.roomId; // Return the room's Convex document ID

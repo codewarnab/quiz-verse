@@ -3,22 +3,31 @@
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts"
+import { useMutation } from "convex/react"
+import { api } from "@/convex/_generated/api"
 
 interface QuizCompleteProps {
+  roomId: string
   correctAnswers: number
   wrongAnswers: number
   totalQuestions: number
 }
 
-export default function QuizComplete({ correctAnswers, wrongAnswers, totalQuestions }: QuizCompleteProps) {
+export default function QuizComplete({roomId, correctAnswers, wrongAnswers, totalQuestions }: QuizCompleteProps) {
   const [visible, setVisible] = useState(false)
+
+  const updateParticipants = useMutation(api.rooms.updateParticipant)
 
   useEffect(() => {
     setVisible(true)
   }, [])
 
+  if(roomId)
+  {
+    updateParticipants({roomId: roomId, status: "completed"})
+  }
   const score = (correctAnswers / totalQuestions) * 100
-
+  
   const pieData = [
     { name: "Correct", value: correctAnswers },
     { name: "Wrong", value: wrongAnswers },
@@ -40,7 +49,7 @@ export default function QuizComplete({ correctAnswers, wrongAnswers, totalQuesti
           <p className="text-green-500 text-2xl">Correct Answers: {correctAnswers}</p>
           <p className="text-red-500 text-2xl">Wrong Answers: {wrongAnswers}</p>
           <p className="text-zinc-400 text-2xl">Total Questions: {totalQuestions}</p>
-          <p className="text-3xl font-bold mt-4">Score: {score.toFixed(2)}%</p>
+          <p className="text-3xl font-bold mt-4">Score: {correctAnswers.toFixed(2)}</p>
           <div className="w-full bg-zinc-800 rounded-full h-4 mt-4">
             <motion.div
               className="bg-green-600 h-full rounded-full"

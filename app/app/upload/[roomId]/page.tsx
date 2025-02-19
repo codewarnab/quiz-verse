@@ -161,6 +161,6 @@ if(filesArray)
 }
 // TODO: add realtime status in button as previous opne
 // TODO: give all buttons better and relevant label 
-//  TODO: Maybe remove room from db  once host leaves, and all participants must be notified and kiscked out 
+// TODO: Maybe remove room from db  once host leaves, and all participants must be notified and kiscked out 
 // TODO: REPLACE ALL IMG TAG WITH NEXT IMAGE
 // TODO:  gamify teh quiz, handle points, leaderboard, etc

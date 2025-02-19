@@ -59,16 +59,17 @@ export default defineSchema({
           name: v.optional(v.string()),
           score: v.optional(v.number()),
           status: v.optional(v.string()), // "ready" | "playing" | "finished"
-          answers: v.optional(
-            v.array(
-              v.object({
-                questionId: v.optional(v.number()),
-                selectedOption: v.optional(v.string()),
-                isCorrect: v.optional(v.boolean()),
-                timeToAnswer: v.optional(v.number()),
-              })
-            )
-          ),
+          timeToAnswer: v.optional(v.array(v.number())), // time taken to answer the quiz
+          // answers: v.optional(
+          //   v.array(
+          //     v.object({
+          //       questionId: v.optional(v.number()),
+          //       selectedOption: v.optional(v.string()),
+          //       isCorrect: v.optional(v.boolean()),
+          //       timeToAnswer: v.optional(v.number()),
+          //     })
+          //   )
+          // ),
         })
       )
     ),
