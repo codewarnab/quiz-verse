@@ -28,7 +28,7 @@ export const getRoom = query({
   handler: async (ctx, args) => {
     const room = await ctx.db.query("rooms").withIndex("byRoomId", q => q.eq("roomId", args.roomId)).unique();
     if (!room) {
-      throw new Error("Room not found");
+      throw new ConvexError("Room not found");
     }
     return room;
   },
@@ -117,15 +117,15 @@ export const leaveRoom = mutation({
 export const updateQuizInfoInRoom = mutation({
   args: {
     roomId: v.string(),
-    status: v.literal("waiting"),
+    status: v.optional(v.literal("waiting")),
     givenfiles: v.optional(v.array(v.object({
-    url: v.string(),
-    size: v.number(),
-    fileName: v.string(),
-    extension: v.string(),
-    mimeType: v.optional(v.string())
-  }))),
-    quiz: v.object({
+      url: v.string(),
+      size: v.number(),
+      fileName: v.string(),
+      extension: v.string(),
+      mimeType: v.optional(v.string())
+    }))),
+    quiz: v.optional(v.object({
       title: v.string(),
       description: v.string(),
       numberOfQuestions: v.number(),
@@ -138,13 +138,12 @@ export const updateQuizInfoInRoom = mutation({
         points: v.optional(v.number()), // Optional points per question
         timeLimit: v.optional(v.number()), // Time limit in seconds
       }))
-    }),
+    })),
     settings: v.optional(v.object({
       maxParticipants: v.number(),
       randomizeQuestions: v.boolean(),
       waitForAllAnswers: v.boolean(),
-    }),
-    )
+    }))
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -161,11 +160,13 @@ export const updateQuizInfoInRoom = mutation({
       throw new Error("Only the host can update the quiz info");
     }
 
-    await ctx.db.patch(room._id, {
-      quiz: args.quiz,
-      givenfiles: args.givenfiles,
-      settings: args.settings,
-    });
+    const updateData: any = {};
+    if (args.quiz) updateData.quiz = args.quiz;
+    if (args.givenfiles) updateData.givenfiles = args.givenfiles;
+    if (args.settings) updateData.settings = args.settings;
+    if (args.status) updateData.status = args.status;
+
+    await ctx.db.patch(room._id, updateData);
 
     return room.roomId; // Return the room's Convex document ID
   }
@@ -177,6 +178,7 @@ export const updateRoomStatus = mutation({
   status: v.union(
     v.literal("in-progress"),
     v.literal("completed"),
+    v.literal("closed"),
   ),
 },
   handler: async (ctx, args) => {
@@ -278,5 +280,28 @@ export const getTopParticipants = query({
       return sumTimeA - sumTimeB;
     }) ?? [];
     return sortedParticipants;
+  }
+});
+
+export const deleteRoom = mutation({
+  args: { roomId: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new ConvexError("Unauthorized");
+
+    // Find the room by roomId
+    const room = await ctx.db.query("rooms")
+      .withIndex("byRoomId", q => q.eq("roomId", args.roomId))
+      .unique();
+
+    if (!room) throw new Error("Room not found");
+
+    if (room.hostId !== identity.subject) {
+      throw new Error("Only the host can delete the room");
+    }
+
+    await ctx.db.delete(room._id);
+
+    return room.roomId // Return the room's Convex document ID
   }
 });

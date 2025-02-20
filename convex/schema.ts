@@ -38,6 +38,7 @@ export default defineSchema({
       v.literal("waiting"),
       v.literal("in-progress"),
       v.literal("completed"),
+      v.literal("closed"),
     ),
     givenfiles: v.optional(v.array(v.object({
       url: v.string(),

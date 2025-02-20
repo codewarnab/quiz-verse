@@ -93,7 +93,7 @@ export default function RoomQuiz() {
       setStopTimer(true)
     }
   
-if(timeTaken.length>0)
+if(timeTaken.length>0 && !quizComplete)
 {
   updateParticipants({roomId: String(roomId), timeTaken: timeTaken, status: "playing",score: correctAnswers})
 }

@@ -33,12 +33,19 @@ export default function QuizComplete({
   }, [roomId, updateParticipants])
 
   const goToLeaderBoard = async () => {
-    // Reset values before navigating to leaderboard
-    await updateParticipants({ roomId: roomId, status: "finished" })
-    localStorage.setItem("currentQuestionIndex", "0")
-    localStorage.setItem("correctAnswers", "0")
-    localStorage.setItem("wrongAnswers", "0")
-    router.push(`/app/leaderBoard/${roomId}`)
+    // Log before calling mutation
+    console.log("Calling updateParticipants mutation with roomId:", roomId)
+    try {
+      // Reset values before navigating to leaderboard
+      await updateParticipants({ roomId: roomId, status: "finished" })
+      console.log("Participant status updated to finished")
+      localStorage.setItem("currentQuestionIndex", "0")
+      localStorage.setItem("correctAnswers", "0")
+      localStorage.setItem("wrongAnswers", "0")
+      router.push(`/app/leaderBoard/${roomId}`)
+    } catch (error) {
+      console.error("Error updating participant status:", error)
+    }
   }
 
   const score = (correctAnswers / totalQuestions) * 100

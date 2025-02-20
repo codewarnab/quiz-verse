@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useMutation } from 'convex/react';
 import { api } from "@/convex/_generated/api";
 import { useParams } from "next/navigation";
-import RoomSettingsForm from './RoomSettingsForm';
 import { useRouter } from "next/navigation"
 interface QuizData {
     title: string;
@@ -39,35 +38,35 @@ const MobileQuizPreview: React.FC<QuizPreviewProps> = ({ quiz, filesArray }) => 
     const [showSample, setShowSample] = useState(false);
     const { roomId } = useParams();
     const updateQuizInfoInRoom = useMutation(api.rooms.updateQuizInfoInRoom);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [settings, setSettings] = useState({
-        maxParticipants: 0,
-        randomizeQuestions: false,
-        waitForAllAnswers: false
-    });
+    // const [isModalOpen, setIsModalOpen] = useState(false);
+    // const [settings, setSettings] = useState({
+    //     maxParticipants: 0,
+    //     randomizeQuestions: false,
+    //     waitForAllAnswers: false
+    // });
 
-    const handleOpenModal = () => {
-        setIsModalOpen(true);
-      };
+    // const handleOpenModal = () => {
+    //     setIsModalOpen(true);
+    //   };
 
-      const handleCloseModal = () => {
-        setIsModalOpen(false);
-      };
+    //   const handleCloseModal = () => {
+    //     setIsModalOpen(false);
+    //   };
 
-    const handleSubmitSettings = (settings: {
-        maxParticipants?: number;
-        randomizeQuestions?: boolean;
-        waitForAllAnswers?: boolean;
-      }) => {
-        setSettings(prevSettings => ({
-            ...prevSettings,
-            ...settings,
-            maxParticipants: settings.maxParticipants ?? prevSettings.maxParticipants,
-            randomizeQuestions: settings.randomizeQuestions ?? prevSettings.randomizeQuestions,
-            waitForAllAnswers: settings.waitForAllAnswers ?? prevSettings.waitForAllAnswers
-        }));
-        console.log('Settings submitted:', settings);
-    };
+    // const handleSubmitSettings = (settings: {
+    //     maxParticipants?: number;
+    //     randomizeQuestions?: boolean;
+    //     waitForAllAnswers?: boolean;
+    //   }) => {
+    //     setSettings(prevSettings => ({
+    //         ...prevSettings,
+    //         ...settings,
+    //         maxParticipants: settings.maxParticipants ?? prevSettings.maxParticipants,
+    //         randomizeQuestions: settings.randomizeQuestions ?? prevSettings.randomizeQuestions,
+    //         waitForAllAnswers: settings.waitForAllAnswers ?? prevSettings.waitForAllAnswers
+    //     }));
+    //     console.log('Settings submitted:', settings);
+    // };
 
     const handleStartingQuiz = async () => {
         // TODO: handle eror, show a toast before redirection to waiting page
@@ -91,9 +90,9 @@ const MobileQuizPreview: React.FC<QuizPreviewProps> = ({ quiz, filesArray }) => 
                 }))
             },
             settings: {
-                maxParticipants: Number(settings.maxParticipants),
-                randomizeQuestions: settings.randomizeQuestions || false,
-                waitForAllAnswers: settings.waitForAllAnswers || false
+                maxParticipants: 20,
+                randomizeQuestions:  false,
+                waitForAllAnswers:  false
             }
         });
         console.log(newRoomId);
@@ -105,17 +104,17 @@ const MobileQuizPreview: React.FC<QuizPreviewProps> = ({ quiz, filesArray }) => 
         }
     }
 
-    const handleStartQuizClick = () => {
-        if (
-            settings.maxParticipants === 0 &&
-            !settings.randomizeQuestions &&
-            !settings.waitForAllAnswers
-        ) {
-            handleOpenModal();
-        } else {
-            handleStartingQuiz();
-        }
-    };
+    // const handleStartQuizClick = () => {
+    //     if (
+    //         settings.maxParticipants === 0 &&
+    //         !settings.randomizeQuestions &&
+    //         !settings.waitForAllAnswers
+    //     ) {
+    //         handleOpenModal();
+    //     } else {
+    //         handleStartingQuiz();
+    //     }
+    // };
     return (
         <div className=''>
         <Card className="w-full max-w-md mx-auto bg-zinc-900 text-white">
@@ -192,14 +191,14 @@ const MobileQuizPreview: React.FC<QuizPreviewProps> = ({ quiz, filesArray }) => 
                 </div>
 
                 {/* Start Button */}
-                <Button className="w-full bg-[#4CAF50] hover:bg-[#45a049] text-white" onClick={handleStartQuizClick}>
+                <Button className="w-full bg-[#4CAF50] hover:bg-[#45a049] text-white" onClick={handleStartingQuiz}>
                     Start Quiz
                 </Button>
-                <RoomSettingsForm
+                {/* <RoomSettingsForm
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSubmit={handleSubmitSettings}
-      />
+      /> */}
             </CardContent>
         </Card>
         </div>
