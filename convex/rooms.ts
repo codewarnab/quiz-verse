@@ -174,8 +174,11 @@ export const updateQuizInfoInRoom = mutation({
 export const updateRoomStatus = mutation({
   args: {
     roomId: v.string(),
-    status: v.literal("in-progress"),
-  },
+  status: v.union(
+    v.literal("in-progress"),
+    v.literal("completed"),
+  ),
+},
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new ConvexError("Unauthorized");
@@ -187,9 +190,9 @@ export const updateRoomStatus = mutation({
 
     if (!room) throw new Error("Room not found");
 
-    if (room.hostId !== identity.subject) {
-      throw new Error("Only the host can update the room status");
-    }
+    // if (room.hostId !== identity.subject) {
+    //   throw new Error("Only the host can update the room status");
+    // }
 
     await ctx.db.patch(room._id, {
       status: args.status,
@@ -217,7 +220,8 @@ export const updateParticipant = mutation({
     roomId: v.string(),
     status: v.union(
       v.literal("playing"),
-      v.literal("completed"),
+      v.literal("finished"),
+      v.literal("left"),
     ),
     score: v.optional(v.number()),
     timeTaken: v.optional(v.array(v.number())),
@@ -250,5 +254,29 @@ export const updateParticipant = mutation({
     });
 
     return room.roomId; // Return the room's Convex document ID
+  }
+});
+
+export const getTopParticipants = query({
+  args: { roomId: v.string() },
+  handler: async (ctx, args) => {
+    const room = await ctx.db.query("rooms")
+      .withIndex("byRoomId", q => q.eq("roomId", args.roomId))
+      .unique();
+
+    if (!room) throw new Error("Room not found");
+
+    const sortedParticipants = room.participants?.sort((a, b) => {
+      const scoreDiff = (b.score ?? 0) - (a.score ?? 0);
+      if (scoreDiff !== 0) return scoreDiff;
+
+      const timeLengthDiff = (b.timeToAnswer?.length ?? 0) - (a.timeToAnswer?.length ?? 0);
+      if (timeLengthDiff !== 0) return timeLengthDiff;
+
+      const sumTimeA = (a.timeToAnswer ?? []).reduce((sum, time) => sum + time, 0);
+      const sumTimeB = (b.timeToAnswer ?? []).reduce((sum, time) => sum + time, 0);
+      return sumTimeA - sumTimeB;
+    }) ?? [];
+    return sortedParticipants;
   }
 });

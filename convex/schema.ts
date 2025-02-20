@@ -58,7 +58,12 @@ export default defineSchema({
           email: v.optional(v.string()),
           name: v.optional(v.string()),
           score: v.optional(v.number()),
-          status: v.optional(v.string()), // "ready" | "playing" | "finished"
+          status: v.union(
+            v.literal("ready"),
+            v.literal("playing"),
+            v.literal("finished"),
+            v.literal("left")
+          ), // "ready" | "playing" | "finished"
           timeToAnswer: v.optional(v.array(v.number())), // time taken to answer the quiz
           // answers: v.optional(
           //   v.array(

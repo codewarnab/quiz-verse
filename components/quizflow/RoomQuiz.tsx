@@ -7,28 +7,30 @@ import QuizComplete from "./QuizComplete"
 import ExplanationDisplay from "./ExplanationDisplay"
 import { api } from "@/convex/_generated/api"
 import { useQuery } from "convex/react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useMutation } from "convex/react"
+import ParticipantOptions  from "../Room Components/ParticipantOptions"
 
+interface Question {
+  points?: number;
+  timeLimit?: number;
+  question: string;
+  options: string[];
+  correctAnswer: string;
+  explanation: string;
+}
 
 export default function RoomQuiz() {
 
     const params = useParams()
+    const router = useRouter()
     const roomId = params.roomId 
     const quizQuestion = useQuery(api.rooms.getQuizQuetsions, { roomId: String(roomId) ?? "" })
-
+    const currentRoom= useQuery(api.rooms.getRoom, { roomId: String(roomId) ?? "" })
     console.log(quizQuestion)
-  interface Question {
-    points?: number;
-    timeLimit?: number;
-    question: string;
-    options: string[];
-    correctAnswer: string;
-    explanation: string;
-  }
-
+  
   const [questions, setQuestions] = useState<Question[]>([])
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(localStorage.getItem("currentQuestionIndex") ? Number(localStorage.getItem("currentQuestionIndex")) : 0)
   const [isLoading, setIsLoading] = useState(true)
   const [quizComplete, setQuizComplete] = useState(false)
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null)
@@ -44,16 +46,26 @@ export default function RoomQuiz() {
     if (quizQuestion) {
       setQuestions(quizQuestion)
       setIsLoading(false)
+      setCorrectAnswers(localStorage.getItem("correctAnswers") ? Number(localStorage.getItem("correctAnswers")) : 0)
+      setWrongAnswers(localStorage.getItem("wrongAnswers") ? Number(localStorage.getItem("wrongAnswers")) : 0)
     }
-  }, [quizQuestion])
+  }, [quizQuestion,router])
 
+  useEffect(() => {
+    if (currentRoom?.status === "completed") {
+      setQuizComplete(true)
+    }
+  }, [currentRoom])
   const handleSubmit = () => {
     if (selectedAnswer) {
       if (selectedAnswer === questions[currentQuestionIndex].correctAnswer) {
         setCorrectAnswers((prev) => prev + (questions[currentQuestionIndex].points ?? 0))
+        localStorage.setItem("correctAnswers", String(correctAnswers + (questions[currentQuestionIndex].points ?? 0)))
         setStopTimer(true)
       } else {
         setWrongAnswers((prev) => prev + 1)
+        localStorage.setItem("wrongAnswers", String(wrongAnswers + 1))
+        setStopTimer(true)
       }
       setShowExplanation(true)
     }
@@ -62,6 +74,9 @@ export default function RoomQuiz() {
   const handleNext = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1)
+      if (currentQuestionIndex + 1 < questions.length) {
+        localStorage.setItem("currentQuestionIndex", String(currentQuestionIndex + 2));
+      }
       setSelectedAnswer(null)
       setShowExplanation(false)
       setTimerKey((prevKey) => prevKey + 1)
@@ -106,32 +121,51 @@ if(timeTaken.length>0)
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <Timer key={timerKey} duration={questions[currentQuestionIndex].timeLimit?? 50} onTimerEnd={stopTimer ? handleTimer : () => {}} stop={stopTimer} />
-      {!showExplanation ? (
-        <QuestionDisplay
-          question={questions[currentQuestionIndex]}
-          selectedAnswer={selectedAnswer}
-          setSelectedAnswer={setSelectedAnswer}
-          onSubmit={handleSubmit}
+    {/* Top section: Participant options on the left; Timer and Question Number on the right */}
+    <div className="flex items-center justify-between mb-4">
+      <ParticipantOptions />
+      <div className="flex w-full items-center gap-4 justify-between">
+      <p className=" flex-start text-2xl font-bold text-white">
+          {currentQuestionIndex + 1}/{questions.length}
+        </p>
+        <Timer
+          key={timerKey}
+          duration={questions[currentQuestionIndex].timeLimit ?? 50}
+          onTimerEnd={handleTimer}
+          stop={stopTimer}
         />
-      ) : (
-        <ExplanationDisplay
-          explanation={questions[currentQuestionIndex].explanation}
-          correctAnswer={questions[currentQuestionIndex].correctAnswer}
-          selectedAnswer={selectedAnswer}
-          onNext={handleNext}
-        />
-      )}
-      <div className="mt-4 text-center space-x-4">
-        <span className="text-green-500">Correct: {correctAnswers}</span>
-        <span className="text-red-500">Wrong: {wrongAnswers}</span>
+       
       </div>
     </div>
+  
+    {/* Main Content: Question or Explanation */}
+    {!showExplanation ? (
+      <QuestionDisplay
+        question={questions[currentQuestionIndex]}
+        selectedAnswer={selectedAnswer}
+        setSelectedAnswer={setSelectedAnswer}
+        onSubmit={handleSubmit}
+      />
+    ) : (
+      <ExplanationDisplay
+        explanation={questions[currentQuestionIndex].explanation}
+        correctAnswer={questions[currentQuestionIndex].correctAnswer}
+        selectedAnswer={selectedAnswer}
+        onNext={handleNext}
+      />
+    )}
+  
+    {/* Score Display */}
+    <div className="mt-4 text-center space-x-4">
+      <span className="text-green-500">Correct: {correctAnswers}</span>
+      <span className="text-red-500">Wrong: {wrongAnswers}</span>
+    </div>
+  </div>
+  
+  
   )
 }
 
-// BAISC UPDATION IMPLEMENTED, 
-// NEXT STEP IS TO KICK OUT THE PARTICIPANT TO LEADERBOARD PAGE AFTER THE QUIZ IS COMPLETED or if timer ends
-// make the leaderboard,
+// very clenly, add toast notification for complete quziz by host
 //  add a dailog box to show a live leader board popup to participants
 //  handle leaving teh room gracefully
