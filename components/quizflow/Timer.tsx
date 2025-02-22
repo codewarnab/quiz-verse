@@ -4,10 +4,11 @@ import { useState, useEffect } from "react"
 
 interface TimerProps {
   duration: number
-  onTimerEnd: () => void
+  onTimerEnd: (elapsedTime: number) => void
+  stop: boolean
 }
 
-export default function Timer({ duration, onTimerEnd }: TimerProps) {
+export default function Timer({ duration, onTimerEnd, stop }: TimerProps) {
   const [timeLeft, setTimeLeft] = useState(duration)
 
   useEffect(() => {
@@ -15,16 +16,21 @@ export default function Timer({ duration, onTimerEnd }: TimerProps) {
   }, [duration])
 
   useEffect(() => {
-    if (timeLeft > 0) {
+    if (timeLeft > 0 && !stop) {
       const timerId = setTimeout(() => {
         setTimeLeft(timeLeft - 1)
       }, 1000)
       return () => clearTimeout(timerId)
     } else {
-      onTimerEnd()
+      onTimerEnd(duration - timeLeft)
     }
-  }, [timeLeft, onTimerEnd])
+  }, [timeLeft, stop])
 
-  return <div className="text-xl font-bold mb-4 text-zinc-400">Time left: {timeLeft} seconds</div>
+  return (
+    <div className="inline-flex items-center rounded bg-zinc-800 px-3 py-1 text-sm font-medium text-zinc-400">
+      Time Left:<span className="ml-1 text-white">{timeLeft}s</span>
+    </div>
+  );
+  
 }
 

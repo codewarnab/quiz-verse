@@ -38,6 +38,7 @@ export default defineSchema({
       v.literal("waiting"),
       v.literal("in-progress"),
       v.literal("completed"),
+      v.literal("closed"),
     ),
     givenfiles: v.optional(v.array(v.object({
       url: v.string(),
@@ -58,17 +59,23 @@ export default defineSchema({
           email: v.optional(v.string()),
           name: v.optional(v.string()),
           score: v.optional(v.number()),
-          status: v.optional(v.string()), // "ready" | "playing" | "finished"
-          answers: v.optional(
-            v.array(
-              v.object({
-                questionId: v.optional(v.number()),
-                selectedOption: v.optional(v.string()),
-                isCorrect: v.optional(v.boolean()),
-                timeToAnswer: v.optional(v.number()),
-              })
-            )
-          ),
+          status: v.union(
+            v.literal("ready"),
+            v.literal("playing"),
+            v.literal("finished"),
+            v.literal("left")
+          ), // "ready" | "playing" | "finished"
+          timeToAnswer: v.optional(v.array(v.number())), // time taken to answer the quiz
+          // answers: v.optional(
+          //   v.array(
+          //     v.object({
+          //       questionId: v.optional(v.number()),
+          //       selectedOption: v.optional(v.string()),
+          //       isCorrect: v.optional(v.boolean()),
+          //       timeToAnswer: v.optional(v.number()),
+          //     })
+          //   )
+          // ),
         })
       )
     ),
