@@ -17,11 +17,11 @@ export default function RootLayout({
                             <Home className="w-6 h-6" />
                             <span className="text-sm mt-1">Home</span>
                         </Link>
-                        <Link href="/app/room" className="flex flex-col items-center text-gray-400">
+                        <Link href="/app/room" className="flex flex-col items-center text-white">
                             <Group className="w-6 h-6" />
                             <span className="text-sm mt-1">Room</span>
                         </Link>
-                        <Link href="/app/profile" className="flex flex-col items-center text-gray-400">
+                        <Link href="/app/profile" className="flex flex-col items-center text-white">
                             <User className="w-6 h-6" />
                             <span className="text-sm mt-1">Profile</span>
                         </Link>

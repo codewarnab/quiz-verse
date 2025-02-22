@@ -31,7 +31,9 @@ export default function WaitingRoom() {
     api.rooms.getRoom,
      !clientRoomId ? "skip" : { roomId: clientRoomId }
   );
-
+  localStorage.setItem("currentQuestionIndex", "0");
+  localStorage.setItem("wrongAnswers", "0");
+  localStorage.setItem("correctAnswer", "0");
   const participants = useQuery(
     api.rooms.getParticipantsInRoom,
      !clientRoomId ? "skip" : { roomId: clientRoomId }
@@ -58,12 +60,9 @@ export default function WaitingRoom() {
   // Redirect to the disabled room page if the room is deleted
   useEffect(() => {
     if (room && room.status === "closed") {
-      if (userDetails?.role === "teacher" || userDetails?.role === "student") {
       router.push("/app/disabledroom");
-      deleteRoom({ roomId: String(clientRoomId) });
     }
-  }
-  }, [room]);
+  }, [room, router]);
 
   // Handle user leaving the room
   const handleLeaveRoom = async () => {
@@ -77,6 +76,9 @@ export default function WaitingRoom() {
   const handleCloseRoom = async () => {
     if (clientRoomId) {
       await updateRoomStatus({ roomId: clientRoomId, status: "closed" });
+      router.push("/app/disabledroom"); 
+      await deleteRoom({ roomId: clientRoomId }); 
+      setClientRoomId(null); 
     }
   };
 
@@ -85,7 +87,7 @@ export default function WaitingRoom() {
     if (clientRoomId && room?.participants && room.participants.length >0) {  //later on change this to 3 maybe after demo
       await updateRoomStatus({ roomId: clientRoomId, status: "in-progress" });
     }
-    if(!room?.participants|| room?.participants && room?.participants?.length ==0 ){
+    if(!room?.participants|| room?.participants && room?.participants?.length == 0 ){
       alert("Minimum 3 participants required to start the quiz.");
     }
   };

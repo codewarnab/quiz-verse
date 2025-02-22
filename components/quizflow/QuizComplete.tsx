@@ -36,9 +36,7 @@ export default function QuizComplete({
     // Log before calling mutation
     console.log("Calling updateParticipants mutation with roomId:", roomId)
     try {
-      // Reset values before navigating to leaderboard
       await updateParticipants({ roomId: roomId, status: "finished" })
-      console.log("Participant status updated to finished")
       localStorage.setItem("currentQuestionIndex", "0")
       localStorage.setItem("correctAnswers", "0")
       localStorage.setItem("wrongAnswers", "0")
@@ -62,39 +60,39 @@ export default function QuizComplete({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full max-w-md mx-auto bg-[#1A1A1A] text-white rounded-lg p-4 md:p-6"
+      className="w-full max-w-md mx-auto bg-zinc-800 text-white rounded-lg p-6 shadow-lg"
     >
-      <h2 className="text-2xl md:text-3xl font-bold text-center mb-4">
+      <h2 className="text-3xl font-bold text-center mb-6">
         Quiz Completed
       </h2>
 
       {/* Metrics in one horizontal axis */}
-      <div className="flex justify-between text-center">
+      <div className="flex justify-between text-center mb-6">
         <div>
-          <span className="block text-green-500 text-xl font-bold">
+          <span className="block text-green-500 text-2xl font-bold">
             {correctAnswers}
           </span>
-          <span className="block text-sm text-gray-300">Correct</span>
+          <span className="block text-sm text-gray-400">Correct</span>
         </div>
         <div>
-          <span className="block text-red-500 text-xl font-bold">
+          <span className="block text-red-500 text-2xl font-bold">
             {wrongAnswers}
           </span>
-          <span className="block text-sm text-gray-300">Wrong</span>
+          <span className="block text-sm text-gray-400">Wrong</span>
         </div>
         <div>
-          <span className="block text-zinc-400 text-xl font-bold">
+          <span className="block text-zinc-400 text-2xl font-bold">
             {totalQuestions}
           </span>
-          <span className="block text-sm text-gray-300">Total</span>
+          <span className="block text-sm text-gray-400">Total</span>
         </div>
       </div>
 
-      <div className="mt-4 text-center text-lg font-bold">
-        Score: {correctAnswers.toFixed(2)}
+      <div className="text-center text-xl font-bold mb-6">
+        Score: {score.toFixed(2)}%
       </div>
 
-      <div className="w-full bg-zinc-800 rounded-full h-3 mt-2">
+      <div className="w-full bg-zinc-700 rounded-full h-3 mb-6">
         <motion.div
           className="bg-green-600 h-full rounded-full"
           initial={{ width: 0 }}
@@ -104,16 +102,17 @@ export default function QuizComplete({
       </div>
 
       {/* Donut Chart for a refined visual */}
-      <div className="mt-6">
-        <ResponsiveContainer width="100%" height={150}>
+      <div className="mb-6">
+        <ResponsiveContainer width="100%" height={200}>
           <PieChart>
             <Pie
               data={pieData}
               cx="50%"
               cy="50%"
-              innerRadius={40}
-              outerRadius={60}
+              innerRadius={50}
+              outerRadius={80}
               dataKey="value"
+              paddingAngle={5}
             >
               {pieData.map((entry, index) => (
                 <Cell
@@ -128,7 +127,7 @@ export default function QuizComplete({
 
       <button
         onClick={goToLeaderBoard}
-        className="mt-4 w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 transition font-semibold"
+        className="w-full py-3 bg-green-600 text-white rounded hover:bg-green-700 transition font-semibold"
       >
         View Leaderboard
       </button>

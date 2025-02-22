@@ -5,11 +5,9 @@ import { Camera, FileText, File, ChevronRight } from "lucide-react"
 
 export default function HomePage() {
     return (
-        <div className="min-h-screen pb-20">
-            {/* Added pb-20 to account for the fixed nav */}
+        <div className="min-h-screen pb-20 text-white">
             {/* Header */}
             <header className="p-6 pb-2">
-                <div className="text-sm mb-4">11:00</div>
                 <h1 className="text-4xl font-bold">Home</h1>
             </header>
             {/* Main Content */}
@@ -42,7 +40,6 @@ export default function HomePage() {
                         </Link>
                     </Card>
 
-                        
                     <Card className="bg-[#4CAF50] hover:bg-[#45a049] transition-colors cursor-pointer border-0">
                         <Link href="/app/upload" className="block p-6">
                             <div className="flex justify-between items-center">
@@ -94,4 +91,3 @@ export default function HomePage() {
         </div>
     )
 }
-
