@@ -27,10 +27,9 @@ export default function Timer({ duration, onTimerEnd, stop }: TimerProps) {
   }, [timeLeft, stop])
 
   return (
-    <div className="inline-flex items-center rounded bg-zinc-800 px-3 py-1 text-sm font-medium text-zinc-400">
+    <div className="inline-flex items-center rounded bg-zinc-800 px-3 py-1 text-sm font-medium text-zinc-400 sm:text-base sm:px-4 sm:py-2">
       Time Left:<span className="ml-1 text-white">{timeLeft}s</span>
     </div>
   );
-  
 }
 

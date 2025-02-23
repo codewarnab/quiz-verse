@@ -90,13 +90,13 @@ export default function QuizComponent() {
 
   if (quizComplete) {
     return (
-      <QuizComplete correctAnswers={correctAnswers} wrongAnswers={wrongAnswers} totalQuestions={questions.length} />
+      <QuizComplete roomId="someRoomId" correctAnswers={correctAnswers} wrongAnswers={wrongAnswers} totalQuestions={questions.length} />
     )
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      {!showExplanation && <Timer key={timerKey} duration={50} onTimerEnd={handleTimerEnd} />}
+    <div className="w-full max-w-2xl mx-auto p-4 sm:p-6">
+      {!showExplanation && <Timer key={timerKey} duration={50} onTimerEnd={handleTimerEnd} stop={false} />}
       {!showExplanation ? (
         <QuestionDisplay
           question={questions[currentQuestionIndex]}

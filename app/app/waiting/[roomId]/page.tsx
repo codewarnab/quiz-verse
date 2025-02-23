@@ -82,10 +82,14 @@ export default function WaitingRoom() {
 
   // Update room status to "in-progress"
   const handleUpdateRoomStatus = async () => {
-    if (clientRoomId && room?.participants && room.participants.length >0) {  //later on change this to 3 maybe after demo
-      await updateRoomStatus({ roomId: clientRoomId, status: "in-progress" });
+    if (clientRoomId && room?.participants && room.participants.length > 0) {  //later on change this to 3 maybe after demo
+      if (room.hostId === user?.id) {
+        await updateRoomStatus({ roomId: clientRoomId, status: "in-progress" });
+      } else {
+        alert("Only the host can start the quiz.");
+      }
     }
-    if(!room?.participants|| room?.participants && room?.participants?.length ==0 ){
+    if (!room?.participants || (room?.participants && room?.participants?.length === 0)) {
       alert("Minimum 3 participants required to start the quiz.");
     }
   };
@@ -210,7 +214,7 @@ export default function WaitingRoom() {
         </div>
 
         <p className="text-gray-500 text-sm text-center">Waiting for more..</p>
-        {userDetails?.role === "teacher" && (
+        { room?.hostId === user?.id && (
         <button className="bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-lg w-full text-sm font-medium" onClick={handleUpdateRoomStatus}>
           Start Quiz
         </button>
