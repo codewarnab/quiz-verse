@@ -3,10 +3,18 @@ import Link from 'next/link';
 import { UploadCloud, Image, File } from 'lucide-react';
 
 interface RoomContentUploadProps {
-  roomId: string;
+  roomId?: string;
 }
 
 const RoomContentUpload: React.FC<RoomContentUploadProps> = ({ roomId }) => {
+  if (!roomId) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-green-500" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
       <h1 className="text-3xl font-extrabold mb-2">Upload Content</h1>

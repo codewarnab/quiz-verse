@@ -47,7 +47,7 @@ const RoomSettingsForm: React.FC<RoomSettingsFormProps> = ({ roomID }) => {
               <Settings className="w-6 h-6 " />
             </button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md bg-zinc-900 border-zinc-800 p-0">
+          <DialogContent className="sm:max-w-md mx-auto bg-zinc-900 border-zinc-800 p-0">
             <div className="p-6">
               <DialogTitle className="text-lg font-medium text-white mb-4">
                 Room Settings

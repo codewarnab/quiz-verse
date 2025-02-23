@@ -23,9 +23,8 @@ export default function JoinRoomButton() {
       alert("Failed to join room. Please check the room ID and try again.");
     }
   };
-
   return (
-    <div className="p-6 rounded-lg text-white text-center">
+    <div className=" rounded-lg text-white text-center">
       <input
         type="text"
         placeholder="Enter Room ID"
@@ -35,7 +34,7 @@ export default function JoinRoomButton() {
       />
       <button
         onClick={handleJoinRoom}
-        className="ml-4 px-6 py-3 bg-green-700 text-white rounded-lg text-lg font-semibold hover:bg-blue-600 transition"
+        className="ml-4 px-6 py-3 bg-[#4CAF50] hover:bg-[#45a049] text-white rounded-lg text-lg font-semibold transition"
       >
         Join
       </button>

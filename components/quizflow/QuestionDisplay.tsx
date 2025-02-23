@@ -9,9 +9,10 @@ interface QuestionProps {
   selectedAnswer: string | null
   setSelectedAnswer: (answer: string) => void
   onSubmit: () => void
+  isSubmitDisabled: boolean; // New prop           
 }
 
-export default function QuestionDisplay({ question, selectedAnswer, setSelectedAnswer, onSubmit }: QuestionProps) {
+export default function QuestionDisplay({ question, selectedAnswer, setSelectedAnswer, onSubmit, isSubmitDisabled }: QuestionProps) {
   const handleAnswerSelect = (option: string) => {
     setSelectedAnswer(option)
   }
@@ -41,7 +42,7 @@ export default function QuestionDisplay({ question, selectedAnswer, setSelectedA
   </div>
   <Button
     onClick={onSubmit}
-    disabled={!selectedAnswer}
+    disabled={!selectedAnswer|| isSubmitDisabled}
     className="w-full py-3 bg-green-600 hover:bg-green-700 text-white"
   >
     Submit
