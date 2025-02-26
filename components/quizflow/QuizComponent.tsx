@@ -67,9 +67,6 @@ export default function QuizComponent() {
     setShowExplanation(true)
   }
 
-  const handleShowStats = () => {
-    setShowStats(true)
-  }
 
   if (!quizQuestion) {
     return (
@@ -87,36 +84,23 @@ export default function QuizComponent() {
     )
   }
 
-  if (quizComplete && showStats) {
-    return (
-      <QuizCompletedSolo roomId="someRoomId" correctAnswers={correctAnswers} wrongAnswers={wrongAnswers} totalQuestions={questions.length} />
-    )
-  }
-
   if (quizComplete) {
     return (
-      <ExplanationDisplay explanations={explanations} questions={questions} onNext={handleShowStats} />
+      <QuizCompletedSolo roomId="someRoomId" correctAnswers={correctAnswers} wrongAnswers={wrongAnswers} totalQuestions={questions.length} />
     )
   }
 
   return (
     <div className="w-full max-w-2xl mx-auto p-4 sm:p-6 mb-7">
       {!showExplanation && <Timer key={timerKey} duration={50} onTimerEnd={handleTimerEnd} stop={false} />}
-      {!showExplanation ? (
+      {!showExplanation &&
         <QuestionDisplay
           question={questions[currentQuestionIndex]}
           selectedAnswer={selectedAnswer}
           setSelectedAnswer={setSelectedAnswer}
           onSubmit={handleSubmit}
         />
-      ) : (
-        <ExplanationDisplay
-          explanations={[questions[currentQuestionIndex].explanation]}
-          correctAnswer={questions[currentQuestionIndex].correctAnswer}
-          selectedAnswer={selectedAnswer}
-          onNext={handleNext}
-        />
-      )}
+       }
       <div className="mt-4 text-center space-x-4">
         <span className="text-green-500">Correct: {correctAnswers}</span>
         <span className="text-red-500">Wrong: {wrongAnswers}</span>

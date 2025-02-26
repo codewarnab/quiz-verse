@@ -35,7 +35,7 @@ export default function JoinRoomButton() {
       />
       <button
         onClick={handleJoinRoom}
-        className="ml-4 px-6 py-3 bg-green-700 text-white rounded-lg text-lg font-semibold hover:bg-blue-600 transition"
+        className="ml-4 px-6 py-3 bg-green-700 text-white rounded-lg text-lg font-semibold hover:bg-green-600 transition"
       >
         Join
       </button>

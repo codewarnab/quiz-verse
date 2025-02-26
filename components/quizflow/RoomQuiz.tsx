@@ -139,13 +139,22 @@ if(timeTaken.length>0 && !quizComplete)
     </div>
   
 
-    {!showExplanation &&
+    {!showExplanation ?
+    (
       <QuestionDisplay
         question={questions[currentQuestionIndex]}
         selectedAnswer={selectedAnswer}
         setSelectedAnswer={setSelectedAnswer}
         onSubmit={handleSubmit}
       />
+    ) : (
+      <ExplanationDisplay
+        explanation={questions[currentQuestionIndex].explanation}
+        correctAnswer={questions[currentQuestionIndex].correctAnswer}
+        selectedAnswer={selectedAnswer}
+        onNext={handleNext}
+      />
+    )
     }
    
   
