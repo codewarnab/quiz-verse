@@ -24,6 +24,8 @@ export default defineSchema({
       v.literal("Quiz Generated"),
       v.literal("Quiz Generation Failed"),
       v.literal("Syncing With Database"),
+      v.literal("Scrapping data from Url"),
+      v.literal("Processing website content") 
 
     )),
   })
