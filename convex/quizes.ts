@@ -15,6 +15,7 @@ export const create = mutation({
         )),
         givenUrl: v.optional(v.array(v.string())),
         title: v.string(),
+        givenText: v.optional(v.string()),
         description: v.optional(v.string()),
         category: v.optional(v.string()),
         difficulty: v.optional(
@@ -50,13 +51,13 @@ export const create = mutation({
 
 export const getQuestions = query(async ({ db }) => {
     const quiz = await db
-      .query("quizes")
-      .first(); // Adjust this if you need a specific quiz
-    
+        .query("quizes")
+        .first(); // Adjust this if you need a specific quiz
+
     if (!quiz) return null;
-    
+
     return quiz.questions;
-  });
+});
 
 
 //   export const getQuestions = query({
