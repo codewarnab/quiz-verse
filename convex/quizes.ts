@@ -52,12 +52,15 @@ export const create = mutation({
 export const getQuestions = query(async ({ db }) => {
     const quiz = await db
         .query("quizes")
-        .first(); // Adjust this if you need a specific quiz
+        .withIndex("by_creation_time") // Ensure there's an index on createdAt
+        .order("desc") // Order by createdAt descending
+        .first();
 
     if (!quiz) return null;
 
     return quiz.questions;
 });
+
 
 
 //   export const getQuestions = query({
