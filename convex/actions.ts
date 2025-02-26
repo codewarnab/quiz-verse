@@ -345,7 +345,6 @@ export const  generateQuizfromFile = action({
             let processedResult;
 
             await ctx.runMutation(api.user.updateQuizgenStatus, { clerkId: userId, status: "Deciding if file can be processed" });
-            await ctx.runMutation(api.user.updateQuizgenStatus, { clerkId: userId, status: "Deciding if file can be processed" });
             if (file.mimeType.startsWith("image/")) {
                 processedResult = await canBeProcessedOrNotImage(file.url, file.extension, file.mimeType);
             } else {
@@ -353,19 +352,25 @@ export const  generateQuizfromFile = action({
             }
  console.log("processedResult",processedResult)
             if (!processedResult.canBeProcessedOrNot) {
-                                return { success: false, error: "File cannot be processed" };
+                await ctx.runMutation(api.user.updateQuizgenStatus, {
+                    clerkId: userId,
+                    status: "Idle",
+                });
+                return { success: false, error: "File cannot be processed" };
             }
             await ctx.runMutation(api.user.updateQuizgenStatus, {
                 clerkId: userId,
                 status: "Generating Quiz",
             });
             let mcqResult;
-            if (file.mimeType.startsWith("image/")) {
-                mcqResult = await generateQuizQuestionsImage(file.url, file.extension, file.mimeType);
-            }
-            else {
-                mcqResult = await generateQuizQuestionsFile(file.url, file.extension, file.mimeType);
-
+            if (processedResult.canBeProcessedOrNot) {
+                if (file.mimeType.startsWith("image/")) {
+                    mcqResult = await generateQuizQuestionsImage(file.url, file.extension, file.mimeType);
+                } else {
+                    mcqResult = await generateQuizQuestionsFile(file.url, file.extension, file.mimeType);
+                }
+            } else {
+                return { success: false, error: "File cannot be processed" };
             }
 
             await ctx.runMutation(api.user.updateQuizgenStatus, {
@@ -398,10 +403,10 @@ export const  generateQuizfromFile = action({
                 createdAt: Date.now(),
             });
 
-            // await ctx.runMutation(api.user.updateQuizgenStatus, {
-            //     clerkId: userId,
-            //     status: "Idle",
-            // });
+            await ctx.runMutation(api.user.updateQuizgenStatus, {
+                clerkId: userId,
+                status: "Idle",
+            });
 
             console.log("mcqResult", mcqResult)
             return { success: true, data: res, mcqResult : mcqResult };
