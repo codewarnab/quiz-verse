@@ -31,6 +31,7 @@ export default defineSchema({
       v.literal("Processing text content"),
 
     )),
+    chatUrls: v.optional(v.array(v.string())), 
   })
     .index("by_email", ["email"])
     .index("by_clerkId", ["clerkId"]),

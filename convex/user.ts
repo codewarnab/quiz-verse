@@ -182,3 +182,26 @@ export const hasEnoughTokens = query({
         return (user.tokens ?? 0) >= tokens;
     }
 })
+
+export const addChatUrl = mutation({
+    args: {
+        clerkId: v.string(),
+        url: v.string()
+    },
+    async handler(ctx, { clerkId, url }) {
+        const user = await ctx.db
+            .query("users")
+            .withIndex("by_clerkId", q => q.eq('clerkId', clerkId))
+            .unique();
+
+        if (!user) {
+            throw new ConvexError("user not Found ")
+        }
+
+        const chatUrls = user.chatUrls || [];
+        const newChatUrls = [...chatUrls, url];
+
+        return ctx.db.patch(user._id, { chatUrls: newChatUrls });
+
+    }
+})
