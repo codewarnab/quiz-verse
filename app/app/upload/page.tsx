@@ -17,6 +17,7 @@ import { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useRouter } from 'next/navigation';
 
 interface UploadedFile {
     url: string;
@@ -27,6 +28,7 @@ interface UploadedFile {
 }
 
 export default function QuizUpload() {
+    const router = useRouter();
     const { edgestore } = useEdgeStore();
     const [filesArray, setFilesArray] = useState<UploadedFile[]>([]);
     console.log(filesArray);
@@ -81,6 +83,9 @@ export default function QuizUpload() {
             });
             const data = await response.json();
             console.log("Quiz created:", data);
+
+            router.push('/app/quiz');
+
         } catch (error) {
             console.error("Error creating quiz:", error);
         }
