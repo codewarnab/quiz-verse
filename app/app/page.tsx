@@ -9,7 +9,6 @@ export default function HomePage() {
             {/* Added pb-20 to account for the fixed nav */}
             {/* Header */}
             <header className="p-6 pb-2">
-                <div className="text-sm mb-4">11:00</div>
                 <h1 className="text-4xl font-bold">Home</h1>
             </header>
             {/* Main Content */}
