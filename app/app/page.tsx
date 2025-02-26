@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Card } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { Camera, FileText, File, ChevronRight } from "lucide-react"
+import { Camera, FileText, File, ChevronRight, Link2Icon } from "lucide-react"
 
 export default function HomePage() {
     return (
@@ -9,7 +9,6 @@ export default function HomePage() {
             {/* Added pb-20 to account for the fixed nav */}
             {/* Header */}
             <header className="p-6 pb-2">
-                <div className="text-sm mb-4">11:00</div>
                 <h1 className="text-4xl font-bold">Home</h1>
             </header>
             {/* Main Content */}
@@ -51,6 +50,17 @@ export default function HomePage() {
                                     <p className="text-white/80">Upload PDF files (max 5000 words)</p>
                                 </div>
                                 <File className="w-8 h-8 text-white" />
+                            </div>
+                        </Link>
+                    </Card>
+                    <Card className="bg-[#4CAF50] hover:bg-[#45a049] transition-colors cursor-pointer border-0">
+                        <Link href="/app/url" className="block p-6">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h3 className="text-2xl font-bold mb-2">URL</h3>
+                                    <p className="text-white/80">Give a url</p>
+                                </div>
+                                <Link2Icon className="w-8 h-8 text-white" />
                             </div>
                         </Link>
                     </Card>

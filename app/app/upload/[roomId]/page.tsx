@@ -16,7 +16,9 @@ import { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useAction } from "convex/react";
 import QuizPreview from "@/components/Room Components/QuizPreview";
+
 
 interface UploadedFile {
   url: string;
@@ -31,7 +33,7 @@ export default function QuizUpload() {
   const [filesArray, setFilesArray] = useState<UploadedFile[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const [quizData, setQuizData] = useState<any>([]);
-//   const [showDropZone, setShowDropZone] = useState(true);
+  const generateQuiz = useAction(api.actions.generateQuizfromFile);
   const { user } = useUser();
   const userDetails = useQuery(api.user.getUser, user?.id ? { clerkId: user.id } : "skip");
 
@@ -63,23 +65,23 @@ export default function QuizUpload() {
 
   async function handleCreateQuiz() {
     try {
-      const response = await fetch("/api/generateQuiz/file", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(filesArray),
-      });
-      const data = await response.json();
-      setQuizData(data.result.quiz);
+      const response = await generateQuiz({ userId: user!.id, file: filesArray[0] });
+      console.log("Quiz generated:", response.mcqResult);
+      setQuizData(response.mcqResult)
+      if(response.mcqResult)
       setShowPreview(true);
     } catch (error) {
       console.error("Error creating quiz:", error);
     }
   }
 
-  if (!userDetails) return
-  <div className="flex items-center justify-center min-screen">
-  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-green-500" />
-</div>;
+  if (!userDetails) {
+    return (
+      <div className="flex items-center justify-center min-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-green-500" />
+      </div>
+    );
+  }
   const hasFiles = dropzone.fileStatuses.length > 0;
 
 if(filesArray)
@@ -93,7 +95,7 @@ if(filesArray)
       </h1>
         <Dropzone {...dropzone} className="bg-zinc-900 text-white">
           <div>
-            {quizData.length === 0 &&
+            {quizData?.length === 0 &&
             <>
             <div className="flex justify-between">
 
@@ -146,7 +148,7 @@ if(filesArray)
             ))}
           </DropzoneFileList>
         </Dropzone>
-        {hasFiles && quizData.length === 0 && (
+        {hasFiles && quizData?.length === 0 && (
         <Button
           className="bg-[#4CAF50] hover:bg-[#45a049] border-t border-green-900 text-white text-xl py-6 w-full max-w-xl mx-auto mt-8"
           disabled={
@@ -168,5 +170,3 @@ if(filesArray)
     </div>
   );
 }
-
-// TODO: REPLACE ALL IMG TAG WITH NEXT IMAGE

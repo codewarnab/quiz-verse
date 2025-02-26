@@ -95,7 +95,7 @@ export async function canBeProcessedOrNotImage(
 
 
         // Create message parts.
-        const textPart = { role: "user", text: "can this file be processed for generating mcq questions?" };
+        const textPart = { role: "user", text: "can this image be processed for generating mcq questions?" };
         const imagePart = { role: "user", type: "image", image: new URL(fileUrl).toString(), mimeType };
 
         // Combine parts into a single JSON string.
@@ -112,7 +112,7 @@ export async function canBeProcessedOrNotImage(
                 },
             ],
         });
-
+        console.log('Object:', object);
         return object;
     } catch (error) {
         console.error("Error in canBeProcessedOrNotImage:", error);
