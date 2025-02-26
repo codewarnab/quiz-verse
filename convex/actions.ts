@@ -167,12 +167,11 @@ export const scrapUrls = action({
                     createdAt: Date.now(),
                 });
 
-                // Update quiz generation status to "Idle"
+                console.log(mcqResult.object)
                 await ctx.runMutation(api.user.updateQuizgenStatus, {
                     clerkId: userId,
                     status: "Idle",
-                });
-                
+                }); 
                 return { success: true, data: result, mcqResult: mcqResult.object };
             }
 
@@ -287,15 +286,13 @@ export const generateQuizfromText = action({
                 });
 
                 console.log(mcqResult.object)
-
                 await ctx.runMutation(api.user.updateQuizgenStatus, {
                     clerkId: userId,
                     status: "Idle",
-                });
-                
+                });                
                 return { success: true, data: result, mcqResult: mcqResult.object };
             }
-
+            
             return { success: true, data: processedResult };
         } catch (error: unknown) {
             console.error("Error in scrapUrls action:", error);

@@ -35,6 +35,7 @@ useEffect(() => {
   };
   const handleExit = () => {
     updateRoomStatus({ roomId: String(roomId), status: "closed" });
+    router.push("/app/disabledroom");
   };
 
   return (

@@ -138,22 +138,16 @@ if(timeTaken.length>0 && !quizComplete)
       </div>
     </div>
   
-    {/* Main Content: Question or Explanation */}
-    {!showExplanation ? (
+
+    {!showExplanation &&
       <QuestionDisplay
         question={questions[currentQuestionIndex]}
         selectedAnswer={selectedAnswer}
         setSelectedAnswer={setSelectedAnswer}
         onSubmit={handleSubmit}
       />
-    ) : (
-      <ExplanationDisplay
-        explanation={questions[currentQuestionIndex].explanation}
-        correctAnswer={questions[currentQuestionIndex].correctAnswer}
-        selectedAnswer={selectedAnswer}
-        onNext={handleNext}
-      />
-    )}
+    }
+   
   
     {/* Score Display */}
     <div className="mt-4 text-center space-x-4">
