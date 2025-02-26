@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { UploadCloud, Image, File } from 'lucide-react';
+import { UploadCloud, Image, File, Link2Icon } from 'lucide-react';
 
 interface RoomContentUploadProps {
   roomId: string;
@@ -16,6 +16,12 @@ const RoomContentUpload: React.FC<RoomContentUploadProps> = ({ roomId }) => {
           <div className="block bg-[#1E1E1E] p-4 rounded-lg text-center hover:bg-[#2C2C2C] transition">
             <UploadCloud className="w-6 h-6 mx-auto mb-1 text-green-400" />
             <div className="text-lg font-semibold">Text Upload</div>
+          </div>
+        </Link>
+        <Link href={`/app/url/${roomId}`}>
+          <div className="block bg-[#1E1E1E] p-4 rounded-lg text-center hover:bg-[#2C2C2C] transition">
+            <Link2Icon className="w-6 h-6 mx-auto mb-1 text-green-400" />
+            <div className="text-lg font-semibold">Link Upload</div>
           </div>
         </Link>
         <Link href={`/app/upload/${roomId}`}>

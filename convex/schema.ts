@@ -10,6 +10,7 @@ export default defineSchema({
     imageUrl: v.string(),
     clerkId: v.string(),
     role: v.string(),
+    chatUrls: v.optional(v.array(v.string())), // chat urls of the user
     tokens: v.optional(v.number()), // deduct the token value when a quiz is generated
     joinedRooms: v.optional(v.array(v.string())), // rooms joined by the user
     quizzes: v.optional(v.array(v.string())), // quizes created by the user

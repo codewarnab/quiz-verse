@@ -1,18 +1,18 @@
 "use client"
 
-import { useState } from 'react'
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAction, useQuery } from "convex/react"
-import { api  } from '@/convex/_generated/api'
-import { useUser  } from "@clerk/clerk-react"
-import { useRouter } from 'next/navigation'
+import { api } from '@/convex/_generated/api'
+import { useUser } from "@clerk/clerk-react"
+import QuizPreview from "@/components/Room Components/QuizPreview"
 
 export default function CrawlerPage() {
     const [urls, setUrls] = useState([''])
-    const [isLoading, setIsLoading] = useState(false)
     const { user, isSignedIn, isLoaded } = useUser();
-    const router = useRouter()
+    const [showPreview, setShowPreview] = useState(false)
+    const [quizData, setQuizData] = useState<any>([])
 
     const userDetails = useQuery(
             api.user.getUser,
@@ -34,21 +34,17 @@ export default function CrawlerPage() {
     }
 
     const startCrawl = async () => {
-        setIsLoading(true)
         const filteredUrls = urls.filter(url => url.trim() !== '')
-
         try {
             const response = await scrapUrls({ urls: filteredUrls, userId: user!.id })
             console.log('Crawl results:', response)
             console.log("user",userDetails)
+            setQuizData(response.mcqResult)
+            if(response.mcqResult)
+            setShowPreview(true)
 
-            if(response.success){
-                router.push("/app/quiz")
-            }
         } catch (error) {
             console.error('Error starting crawl:', error)
-        } finally {
-            setIsLoading(false)
         }
     }
 
@@ -84,6 +80,10 @@ export default function CrawlerPage() {
                         ? "Create Quiz"
                         : userDetails?.quizgenStatus}
             </Button>
+
+            
+        {showPreview && <QuizPreview quiz={quizData} filesArray={[{ url: urls[0] }]} />}
+            
         </div>
     )
 }

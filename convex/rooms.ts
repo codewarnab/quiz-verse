@@ -125,6 +125,7 @@ export const updateQuizInfoInRoom = mutation({
       extension: v.string(),
       mimeType: v.optional(v.string())
     }))),
+    givenUrl: v.optional(v.array(v.string())),
     quiz: v.optional(v.object({
       title: v.string(),
       description: v.string(),
