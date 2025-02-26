@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 
 export const create = mutation({
@@ -48,3 +48,30 @@ export const create = mutation({
     },
 });
 
+export const getQuestions = query(async ({ db }) => {
+    const quiz = await db
+      .query("quizes")
+      .first(); // Adjust this if you need a specific quiz
+    
+    if (!quiz) return null;
+    
+    return quiz.questions;
+  });
+
+
+//   export const getQuestions = query({
+//     args: {
+//         createdBy: v.string(),
+//     },
+//     async handler(ctx, args) {
+//         const quiz = await ctx.db
+//             .query("quizes")
+//             .filter(q => q.eq(q.field("createdBy"), args.createdBy))
+//             .order("desc", q => q.field("createdAt"))
+//             .first();
+
+//         if (!quiz) return null;
+
+//         return quiz.questions;
+//     }
+// });

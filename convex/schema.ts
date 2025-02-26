@@ -2,6 +2,8 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
+ 
+  // USER SCHEMA
   users: defineTable({
     username: v.string(),
     email: v.string(),
@@ -32,22 +34,22 @@ export default defineSchema({
     .index("by_email", ["email"])
     .index("by_clerkId", ["clerkId"]),
 
-
-
-
+    // ROOM SCHEMA
   rooms: defineTable({
-    name: v.string(),
     status: v.union(
       v.literal("waiting"),
       v.literal("in-progress"),
       v.literal("completed"),
+      v.literal("closed"),
     ),
-    // givenfile: v.object({
-    //   url: v.string(),
-    //   size: v.number(),
-    //   fileName: v.string(),
-    //   extension: v.string(),
-    // }),
+    givenfiles: v.optional(v.array(v.object({
+      url: v.string(),
+      size: v.number(),
+      fileName: v.string(),
+      extension: v.string(),
+      mimeType: v.optional(v.string())
+    }))),
+    givenUrl: v.optional(v.array(v.string())),
     hostedBy: v.string(),
     hostId: v.string(), // Owner/creator of the room
     roomId: v.string(),
@@ -59,24 +61,31 @@ export default defineSchema({
           email: v.optional(v.string()),
           name: v.optional(v.string()),
           score: v.optional(v.number()),
-          status: v.optional(v.string()), // "ready" | "playing" | "finished"
-          answers: v.optional(
-            v.array(
-              v.object({
-                questionId: v.optional(v.number()),
-                selectedOption: v.optional(v.string()),
-                isCorrect: v.optional(v.boolean()),
-                timeToAnswer: v.optional(v.number()),
-              })
-            )
-          ),
+          status: v.union(
+            v.literal("ready"),
+            v.literal("playing"),
+            v.literal("finished"),
+            v.literal("left")
+          ), // "ready" | "playing" | "finished"
+          timeToAnswer: v.optional(v.array(v.number())), // time taken to answer the quiz
+          // answers: v.optional(
+          //   v.array(
+          //     v.object({
+          //       questionId: v.optional(v.number()),
+          //       selectedOption: v.optional(v.string()),
+          //       isCorrect: v.optional(v.boolean()),
+          //       timeToAnswer: v.optional(v.number()),
+          //     })
+          //   )
+          // ),
         })
       )
     ),
-    quiz: v.object({
+    quiz: v.optional(v.object({
       title: v.string(),
       description: v.optional(v.string()),
       numberOfQuestions: v.number(),
+      category: v.optional(v.string()),
       questions: v.array(
         v.object({
           question: v.string(),
@@ -87,24 +96,19 @@ export default defineSchema({
           timeLimit: v.optional(v.number()),
         })
       ),
-    }),
-    settings: v.object({
+    })),
+    settings: v.optional(v.object({
       maxParticipants: v.optional(v.number()),
       randomizeQuestions: v.optional(v.boolean()),
       waitForAllAnswers: v.optional(v.boolean()),
-    }),
+    })),
     startedAt: v.optional(v.number()),
     endedAt: v.optional(v.number()),
   })
     .index("byRoomId", ["roomId"])
     .index("byHostId", ["hostId"]),
 
-
-
-
-
-
-
+    // QUIZ SCHEMA
   quizes: defineTable({
     createdBy: v.string(),
     givenfiles: v.optional(v.array(v.object({
@@ -140,12 +144,7 @@ export default defineSchema({
     createdAt: v.number(), // Timestamp when quiz was created
   }).index("by_creator", ["createdBy"]),
 
-
-
-
-
-
-
+  // QUIZ ATTEMPTS SCHEMA
   quizAttempts: defineTable({
     userId: v.string(),
     quizId: v.string(),
