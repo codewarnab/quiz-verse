@@ -32,22 +32,6 @@ export default function QuizCompletedSolo({
     }
   }, [roomId, updateParticipants])
 
-//   const goToLeaderBoard = async () => {
-//     // Log before calling mutation
-//     console.log("Calling updateParticipants mutation with roomId:", roomId)
-//     try {
-//       // Reset values before navigating to leaderboard
-//       await updateParticipants({ roomId: roomId, status: "finished" })
-//       console.log("Participant status updated to finished")
-//       localStorage.setItem("currentQuestionIndex", "0")
-//       localStorage.setItem("correctAnswers", "0")
-//       localStorage.setItem("wrongAnswers", "0")
-//       router.push(`/app/leaderBoard/${roomId}`)
-//     } catch (error) {
-//       console.error("Error updating participant status:", error)
-//     }
-//   }
-
   const score = (correctAnswers / totalQuestions) * 100
 
   const pieData = [
@@ -126,12 +110,26 @@ export default function QuizCompletedSolo({
         </ResponsiveContainer>
       </div>
 
-      {/* <button
-        onClick={goToLeaderBoard}
-        className="mt-4 w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 transition font-semibold"
-      >
-        View Leaderboard
-      </button> */}
+      <div className="mt-6 flex justify-center space-x-4">
+        <button
+          className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition"
+          onClick={() => window.location.reload()}
+        >
+          Reattempt
+        </button>
+        <button
+          className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition"
+          onClick={() => window.location.href = "/app"}
+        >
+          Back to Home
+        </button>
+        <button
+          className="bg-gray-700 absolute top-2 right-4 text-white py-2 px-4 rounded cursor-not-allowed"
+          disabled
+        >
+          Save
+        </button>
+      </div>
     </motion.div>
   )
 }

@@ -28,8 +28,7 @@ export default function QuizComponent() {
   const [timerKey, setTimerKey] = useState(0)
   const [correctAnswers, setCorrectAnswers] = useState(0)
   const [wrongAnswers, setWrongAnswers] = useState(0)
-  const [explanations, setExplanations] = useState<string[]>([])
-  const [showStats, setShowStats] = useState(false)
+  // const [explanations, setExplanations] = useState<string[]>([])
 
   useEffect(() => {
     if (quizQuestion) {
@@ -45,7 +44,6 @@ export default function QuizComponent() {
       } else {
         setWrongAnswers((prev) => prev + 1)
       }
-      setExplanations((prev) => [...prev, questions[currentQuestionIndex].explanation])
       handleNext()
     }
   }
@@ -67,9 +65,6 @@ export default function QuizComponent() {
     setShowExplanation(true)
   }
 
-  const handleShowStats = () => {
-    setShowStats(true)
-  }
 
   if (!quizQuestion) {
     return (
@@ -87,36 +82,28 @@ export default function QuizComponent() {
     )
   }
 
-  if (quizComplete && showStats) {
+  if (quizComplete) {
     return (
       <QuizCompletedSolo roomId="someRoomId" correctAnswers={correctAnswers} wrongAnswers={wrongAnswers} totalQuestions={questions.length} />
     )
   }
 
-  if (quizComplete) {
-    return (
-      <ExplanationDisplay explanations={explanations} questions={questions} onNext={handleShowStats} />
-    )
-  }
-
   return (
     <div className="w-full max-w-2xl mx-auto p-4 sm:p-6 mb-7">
-      {!showExplanation && <Timer key={timerKey} duration={50} onTimerEnd={handleTimerEnd} stop={false} />}
-      {!showExplanation ? (
+      <div className="flex w-full items-center gap-4 justify-between">
+      <p className=" flex-start p-2 text-xl font-bold text-white">
+          {currentQuestionIndex + 1}/{questions.length}
+        </p>
+        <Timer key={timerKey} duration={50} onTimerEnd={handleTimerEnd} stop={false} />
+      </div>
+      {
         <QuestionDisplay
           question={questions[currentQuestionIndex]}
           selectedAnswer={selectedAnswer}
           setSelectedAnswer={setSelectedAnswer}
           onSubmit={handleSubmit}
         />
-      ) : (
-        <ExplanationDisplay
-          explanations={[questions[currentQuestionIndex].explanation]}
-          correctAnswer={questions[currentQuestionIndex].correctAnswer}
-          selectedAnswer={selectedAnswer}
-          onNext={handleNext}
-        />
-      )}
+       }
       <div className="mt-4 text-center space-x-4">
         <span className="text-green-500">Correct: {correctAnswers}</span>
         <span className="text-red-500">Wrong: {wrongAnswers}</span>
