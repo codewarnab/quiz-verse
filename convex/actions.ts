@@ -12,6 +12,7 @@ type ScrapUrlsActionResult = {
     data?: unknown;
     error?: string;
     details?: unknown;
+    mcqResult?: unknown;
 };
 
 export const scrapUrls = action({
@@ -165,9 +166,14 @@ export const scrapUrls = action({
                     questions: mcqResult.object.questions,
                     createdAt: Date.now(),
                 });
-                console.log(mcqResult)
+                console.log(mcqResult.object)
 
-                return { success: true, data: result };
+                await ctx.runMutation(api.user.updateQuizgenStatus, {
+                    clerkId: userId,
+                    status: "Idle",
+                });
+                
+                return { success: true, data: result, mcqResult: mcqResult.object };
             }
 
             // If content cannot be processed for quiz
@@ -178,7 +184,6 @@ export const scrapUrls = action({
         }
     },
 });
-
 
 
 export const generateQuizfromText = action({
@@ -281,7 +286,13 @@ export const generateQuizfromText = action({
                     createdAt: Date.now(),
                 });
 
-                return { success: true, data: result };
+                await ctx.runMutation(api.user.updateQuizgenStatus, {
+                    clerkId: userId,
+                    status: "Idle",
+                });
+                console.log("mcqResult", mcqResult.object)
+
+                return { success: true, data: result, mcqResult: mcqResult.object };
             }
 
             return { success: true, data: processedResult };
@@ -342,9 +353,9 @@ export const  generateQuizfromFile = action({
             } else {
                 processedResult = await canBeProcessedOrNotFile(file.url, file.extension, file.mimeType);
             }
-
+ console.log("processedResult",processedResult)
             if (!processedResult.canBeProcessedOrNot) {
-                return { success: false, error: "File cannot be processed" };
+                                return { success: false, error: "File cannot be processed" };
             }
             await ctx.runMutation(api.user.updateQuizgenStatus, {
                 clerkId: userId,
@@ -389,9 +400,12 @@ export const  generateQuizfromFile = action({
                 createdAt: Date.now(),
             });
 
+            await ctx.runMutation(api.user.updateQuizgenStatus, {
+                clerkId: userId,
+                status: "Idle",
+            });
 
-
-            return { success: true, data: res };
+            return { success: true, data: res, mcqResult };
         } catch (error: unknown) {
             console.error("Error in scrapUrls action:", error);
             return { success: false, error: "Internal Server Error" };

@@ -18,7 +18,7 @@ import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from 'next/navigation';
-
+import { useAction } from "convex/react";
 interface UploadedFile {
     url: string;
     size: number;
@@ -31,6 +31,9 @@ export default function QuizUpload() {
     const router = useRouter();
     const { edgestore } = useEdgeStore();
     const [filesArray, setFilesArray] = useState<UploadedFile[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const generateQuiz = useAction(api.actions.generateQuizfromFile);
+    console.log(generateQuiz);
     console.log(filesArray);
     const { user } = useUser();
     const userDetails = useQuery(
@@ -74,20 +77,19 @@ export default function QuizUpload() {
 
     async function handleCreateQuiz() {
         try {
-            const response = await fetch("/api/generateQuiz/file", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(filesArray),
-            });
-            const data = await response.json();
-            console.log("Quiz created:", data);
-
+            const response = await generateQuiz({  userId: user!.id,file: filesArray[0] });
+            console.log("RESPONSEEEE",response)
+            if(response.success){
+                console.log("Quiz created successfully")
             router.push('/app/quiz');
+            }
 
         } catch (error) {
             console.error("Error creating quiz:", error);
+        }
+        finally{
+            console.log("Finally")
+            setIsLoading(false)
         }
     }
 
@@ -178,7 +180,7 @@ export default function QuizUpload() {
                         className="bg-[#4CAF50] hover:bg-[#45a049] text-white text-xl py-6 w-full max-w-xl mx-auto mt-8"
                         disabled={
                             dropzone.fileStatuses.some((file) => file.status === "pending") ||
-                            (userDetails.quizgenStatus !== "Idle" && userDetails.quizgenStatus !== undefined)
+                            (userDetails.quizgenStatus !== "Idle" && userDetails.quizgenStatus !== undefined)|| isLoading
                         }
                         onClick={handleCreateQuiz}
                     >

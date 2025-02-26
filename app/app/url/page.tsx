@@ -3,15 +3,22 @@
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useAction } from "convex/react"
-import { api } from '@/convex/_generated/api'
-import { useUser } from "@clerk/clerk-react"
+import { useAction, useQuery } from "convex/react"
+import { api  } from '@/convex/_generated/api'
+import { useUser  } from "@clerk/clerk-react"
+import { useRouter } from 'next/navigation'
 
 export default function CrawlerPage() {
     const [urls, setUrls] = useState([''])
     const [isLoading, setIsLoading] = useState(false)
     const { user, isSignedIn, isLoaded } = useUser();
+    const router = useRouter()
 
+    const userDetails = useQuery(
+            api.user.getUser,
+            user?.id ? { clerkId: user.id } : "skip"
+    
+        );
 
     // Use the Convex action "scrapUrls"
     const scrapUrls = useAction(api.actions.scrapUrls)
@@ -33,6 +40,11 @@ export default function CrawlerPage() {
         try {
             const response = await scrapUrls({ urls: filteredUrls, userId: user!.id })
             console.log('Crawl results:', response)
+            console.log("user",userDetails)
+
+            if(response.success){
+                router.push("/app/quiz")
+            }
         } catch (error) {
             console.error('Error starting crawl:', error)
         } finally {
@@ -60,8 +72,17 @@ export default function CrawlerPage() {
             <Button onClick={addUrlInput} className="mb-4">
                 Add URL
             </Button>
-            <Button onClick={startCrawl} disabled={isLoading} className="ml-2 mb-4">
-                {isLoading ? 'Crawling...' : 'Start Crawl'}
+            <Button
+                className="bg-[#4CAF50] hover:bg-[#45a049] text-white text-xl py-6 w-full max-w-xl mx-auto mt-8"
+                disabled={
+                    userDetails?.quizgenStatus !== "Idle"
+                }
+                onClick={startCrawl}
+            >
+              
+                { userDetails?.quizgenStatus === "Idle"
+                        ? "Create Quiz"
+                        : userDetails?.quizgenStatus}
             </Button>
         </div>
     )

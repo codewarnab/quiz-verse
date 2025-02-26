@@ -38,35 +38,6 @@ const MobileQuizPreview: React.FC<QuizPreviewProps> = ({ quiz, filesArray }) => 
     const [showSample, setShowSample] = useState(false);
     const { roomId } = useParams();
     const updateQuizInfoInRoom = useMutation(api.rooms.updateQuizInfoInRoom);
-    // const [isModalOpen, setIsModalOpen] = useState(false);
-    // const [settings, setSettings] = useState({
-    //     maxParticipants: 0,
-    //     randomizeQuestions: false,
-    //     waitForAllAnswers: false
-    // });
-
-    // const handleOpenModal = () => {
-    //     setIsModalOpen(true);
-    //   };
-
-    //   const handleCloseModal = () => {
-    //     setIsModalOpen(false);
-    //   };
-
-    // const handleSubmitSettings = (settings: {
-    //     maxParticipants?: number;
-    //     randomizeQuestions?: boolean;
-    //     waitForAllAnswers?: boolean;
-    //   }) => {
-    //     setSettings(prevSettings => ({
-    //         ...prevSettings,
-    //         ...settings,
-    //         maxParticipants: settings.maxParticipants ?? prevSettings.maxParticipants,
-    //         randomizeQuestions: settings.randomizeQuestions ?? prevSettings.randomizeQuestions,
-    //         waitForAllAnswers: settings.waitForAllAnswers ?? prevSettings.waitForAllAnswers
-    //     }));
-    //     console.log('Settings submitted:', settings);
-    // };
 
     const handleStartingQuiz = async () => {
         // TODO: handle eror, show a toast before redirection to waiting page

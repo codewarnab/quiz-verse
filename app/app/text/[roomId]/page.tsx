@@ -6,13 +6,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { useAction } from "convex/react"
 import { api } from '@/convex/_generated/api'
 import { useUser } from "@clerk/clerk-react"
-import { useRouter } from 'next/navigation'
-
 
 export default function TextInputPage() {
     const [text, setText] = useState("")
     const { user, isLoaded, isSignedIn } = useUser()
-    const router = useRouter()
     const generateQuizfromText = useAction(api.actions.generateQuizfromText)
     const handleGenerateQuiz = async () => {
         if (!isSignedIn || !isLoaded) {
@@ -21,9 +18,6 @@ export default function TextInputPage() {
         try {
             const response = await generateQuizfromText({ text, userId: user!.id })
             console.log('Quiz generated:', response)
-            if(response.success){
-                router.push("/app/quiz")
-            }
         } catch (error) {
             console.error('Error generating quiz:', error)
         }

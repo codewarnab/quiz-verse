@@ -16,6 +16,7 @@ import { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useAction } from "convex/react";
 import QuizPreview from "@/components/Room Components/QuizPreview";
 
 interface UploadedFile {
@@ -31,7 +32,7 @@ export default function QuizUpload() {
   const [filesArray, setFilesArray] = useState<UploadedFile[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const [quizData, setQuizData] = useState<any>([]);
-//   const [showDropZone, setShowDropZone] = useState(true);
+  const generateQuiz = useAction(api.actions.generateQuizfromFile);
   const { user } = useUser();
   const userDetails = useQuery(api.user.getUser, user?.id ? { clerkId: user.id } : "skip");
 
@@ -63,13 +64,7 @@ export default function QuizUpload() {
 
   async function handleCreateQuiz() {
     try {
-      const response = await fetch("/api/generateQuiz/file", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(filesArray),
-      });
-      const data = await response.json();
-      setQuizData(data.result.quiz);
+      const response = await generateQuiz({ userId: user!.id, file: filesArray[0] });
       setShowPreview(true);
     } catch (error) {
       console.error("Error creating quiz:", error);
@@ -168,5 +163,3 @@ if(filesArray)
     </div>
   );
 }
-
-// TODO: REPLACE ALL IMG TAG WITH NEXT IMAGE
