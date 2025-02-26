@@ -25,7 +25,7 @@ const LeaderBoardPage = () => {
 
   useEffect(() => {
     if (room && room.status === 'closed') {
-      router.push('/app/disabledroom');
+      router.push('/app');
       deleteRoom({ roomId: String(roomId) })
         .then(() => {
           console.log('Room successfully deleted.');
