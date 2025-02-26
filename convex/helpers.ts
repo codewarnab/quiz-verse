@@ -1,3 +1,9 @@
+import { generateObject } from "ai";
+import { processedschema, quizSchema } from "./zodSchema";
+import { google } from "@ai-sdk/google";
+import { QUIZ_GENERATION_SYSTEM_MESSAGE, systemMessageFile } from "./systemMessagtes";
+import { z } from "zod";
+
 export function getHeaders(): Record<string, string> {
     console.log('Getting headers with API key');
     const headers = {
@@ -76,4 +82,146 @@ export async function pollForBatchResult(
     }
     console.log('Batch scraping timed out after', maxTime, 'ms');
     return { success: false, error: "Batch scraping timed out" };
+}
+
+export type ProcessedResult = z.infer<typeof processedschema>;
+
+export async function canBeProcessedOrNotImage(
+    fileUrl: string,
+    fileType: string,
+    mimeType: string,
+): Promise<ProcessedResult> {
+    try {
+
+
+        // Create message parts.
+        const textPart = { role: "user", text: "can this file be processed for generating mcq questions?" };
+        const imagePart = { role: "user", type: "image", image: new URL(fileUrl).toString(), mimeType };
+
+        // Combine parts into a single JSON string.
+        const combinedContent = JSON.stringify([textPart, imagePart]);
+
+        const { object } = await generateObject({
+            model: google("gemini-1.5-flash"),
+            system: systemMessageFile,
+            schema: processedschema,
+            messages: [
+                {
+                    role: "user",
+                    content: combinedContent,
+                },
+            ],
+        });
+
+        return object;
+    } catch (error) {
+        console.error("Error in canBeProcessedOrNotImage:", error);
+        // Remove the error property to match the schema.
+        return { canBeProcessedOrNot: false };
+    }
+}
+
+export async function canBeProcessedOrNotFile(
+    fileUrl: string,
+    fileType: string,
+    mimeType: string,
+): Promise<ProcessedResult> {
+    try {
+
+
+        const { object } = await generateObject({
+            model: google("gemini-1.5-flash"),
+            system: systemMessageFile,
+            schema: processedschema,
+            messages: [
+                {
+                    role: "user",
+                    content: [
+                        {
+                            type: "text",
+                            text: `can this ${fileType} file be processed for generating mcq questions?`,
+                        },
+                        {
+                            type: "file",
+                            data: new URL(fileUrl).toString(),
+                            mimeType: mimeType,
+                        },
+                    ],
+                },
+            ],
+        });
+        return object;
+    } catch (error) {
+        console.error("Error in canBeProcessedOrNotFile:", error);
+        // Return only the properties defined in your schema.
+        return { canBeProcessedOrNot: false };
+    }
+}
+
+export type QuizResult = z.infer<typeof quizSchema>;
+
+export async function generateQuizQuestionsImage(
+    fileUrl: string,
+    fileType: string,
+    mimeType: string,
+): Promise<QuizResult> {
+    try {
+
+        // Create message parts.
+        const textPart = { role: "user", text: `Generate MCQ questions based on this ${fileType} file.` };
+        const imagePart = { role: "user", type: "image", image: new URL(fileUrl).toString(), mimeType };
+        // Combine the parts into a single JSON string.
+        const combinedContent = JSON.stringify([textPart, imagePart]);
+
+        const { object } = await generateObject({
+            model: google("gemini-1.5-flash"),
+            system: QUIZ_GENERATION_SYSTEM_MESSAGE,
+            schema: quizSchema,
+            messages: [
+                {
+                    role: "user",
+                    content: combinedContent,
+                },
+            ],
+        });
+        return object;
+    } catch (error) {
+        console.error("Error generating quiz questions for image:", error);
+        throw error;
+    }
+}
+
+
+export async function generateQuizQuestionsFile(
+    fileUrl: string,
+    fileType: string,
+    mimeType: string,
+): Promise<QuizResult> {
+    try {
+        const { object } = await generateObject({
+            model: google("gemini-1.5-flash"),
+            system: QUIZ_GENERATION_SYSTEM_MESSAGE,
+            schema: quizSchema,
+            messages: [
+                {
+                    role: "user",
+                    content: [
+                        {
+                            type: "text",
+                            text: `Generate MCQ questions based on this ${fileType} file.`,
+                        },
+                        {
+                            type: "file",
+                            data: new URL(fileUrl).toString(),
+                            mimeType: mimeType,
+                        },
+                    ],
+                },
+            ],
+        });
+        return object;
+    } catch (error) {
+        console.error("Error generating quiz questions for file:", error);
+        throw error;
+    }
 }

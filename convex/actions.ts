@@ -1,7 +1,7 @@
 import { api } from "./_generated/api";
 import { action } from "./_generated/server";
 import { v } from "convex/values";
-import { getHeaders, buildPayload, pollForBatchResult } from "./helpers";
+import { getHeaders, buildPayload, pollForBatchResult, canBeProcessedOrNotImage, canBeProcessedOrNotFile, generateQuizQuestionsImage, generateQuizQuestionsFile } from "./helpers";
 import { generateObject } from "ai";
 import { google } from "@ai-sdk/google";
 import { QUIZ_GENERATION_SYSTEM_MESSAGE, QUIZ_GENERATION_SYSTEM_MESSAGE_TEXT, systemMessage, systemMessageText } from "./systemMessagtes";
@@ -292,3 +292,110 @@ export const generateQuizfromText = action({
     },
 
 })
+
+
+export const  generateQuizfromFile = action({
+    args: {
+        userId: v.string(),
+        file: v.object({
+            url: v.string(),
+            size: v.number(),
+            fileName: v.string(),
+            extension: v.string(),
+            mimeType: v.string(),
+        }),
+    },
+    handler: async (
+        ctx,
+        { userId, file }
+    ): Promise<any> => {
+        try {
+            await ctx.runMutation(api.user.updateQuizgenStatus, {
+                clerkId: userId,
+                status: "Received Request",
+            });
+            await ctx.runMutation(api.user.updateQuizgenStatus, {
+                clerkId: userId,
+                status: "Checking Available Tokens",
+            });
+
+            const hasTokens = await ctx.runQuery(api.user.hasEnoughTokens, {
+                clerkId: userId,
+                tokens: 1,
+            });
+
+            if (!hasTokens) {
+                return { success: false, error: "Not enough tokens" };
+            }
+
+            await ctx.runMutation(api.user.updateQuizgenStatus, {
+                clerkId: userId,
+                status: "Processing File",
+            });
+
+            let processedResult;
+
+            await ctx.runMutation(api.user.updateQuizgenStatus, { clerkId: userId, status: "Deciding if file can be processed" });
+            await ctx.runMutation(api.user.updateQuizgenStatus, { clerkId: userId, status: "Deciding if file can be processed" });
+            if (file.mimeType.startsWith("image/")) {
+                processedResult = await canBeProcessedOrNotImage(file.url, file.extension, file.mimeType);
+            } else {
+                processedResult = await canBeProcessedOrNotFile(file.url, file.extension, file.mimeType);
+            }
+
+            if (!processedResult.canBeProcessedOrNot) {
+                return { success: false, error: "File cannot be processed" };
+            }
+            await ctx.runMutation(api.user.updateQuizgenStatus, {
+                clerkId: userId,
+                status: "Generating Quiz",
+            });
+            let mcqResult;
+            if (file.mimeType.startsWith("image/")) {
+                mcqResult = await generateQuizQuestionsImage(file.url, file.extension, file.mimeType);
+            }
+            else {
+                mcqResult = await generateQuizQuestionsFile(file.url, file.extension, file.mimeType);
+
+            }
+
+            await ctx.runMutation(api.user.updateQuizgenStatus, {
+                clerkId: userId,
+                status: "Quiz Generated",
+            });
+
+            await ctx.runMutation(api.user.updateQuizgenStatus, {
+                clerkId: userId,
+                status: "Syncing With Database",
+            });
+
+            const givenFile = [{
+                url: file.url,
+                size: file.size,
+                fileName: file.fileName,
+                extension: file.extension,
+            }]
+            const res = await ctx.runMutation(api.quizes.create, {
+                createdBy: userId,
+                givenfiles: givenFile,
+                title: mcqResult.title,
+                description: mcqResult.description,
+                category: mcqResult.category,
+                difficulty: mcqResult.difficulty,
+                timeLimit: mcqResult.timeLimit,
+                instructions: mcqResult.instructions,
+                numberOfQuestions: mcqResult.numberOfQuestions,
+                questions: mcqResult.questions,
+                createdAt: Date.now(),
+            });
+
+
+
+            return { success: true, data: res };
+        } catch (error: unknown) {
+            console.error("Error in scrapUrls action:", error);
+            return { success: false, error: "Internal Server Error" };
+        }
+    },
+})
+
