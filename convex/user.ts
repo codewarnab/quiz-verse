@@ -145,7 +145,8 @@ export const updateQuizgenStatus = mutation({
             v.literal("Quiz Generation Failed"),
             v.literal("Syncing With Database"),
             v.literal("Scrapping data from Url"),
-            v.literal("Processing website content")
+            v.literal("Processing website content"),
+            v.literal("Processing text content")
         ),
     },
     async handler(ctx, { clerkId, status }) {

@@ -2,7 +2,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
- 
+
   // USER SCHEMA
   users: defineTable({
     username: v.string(),
@@ -27,14 +27,15 @@ export default defineSchema({
       v.literal("Quiz Generation Failed"),
       v.literal("Syncing With Database"),
       v.literal("Scrapping data from Url"),
-      v.literal("Processing website content") 
+      v.literal("Processing website content"),
+      v.literal("Processing text content"),
 
     )),
   })
     .index("by_email", ["email"])
     .index("by_clerkId", ["clerkId"]),
 
-    // ROOM SCHEMA
+  // ROOM SCHEMA
   rooms: defineTable({
     status: v.union(
       v.literal("waiting"),
@@ -50,6 +51,7 @@ export default defineSchema({
       mimeType: v.optional(v.string())
     }))),
     givenUrl: v.optional(v.array(v.string())),
+    givenText: v.optional(v.string()),
     hostedBy: v.string(),
     hostId: v.string(), // Owner/creator of the room
     roomId: v.string(),
@@ -108,7 +110,7 @@ export default defineSchema({
     .index("byRoomId", ["roomId"])
     .index("byHostId", ["hostId"]),
 
-    // QUIZ SCHEMA
+  // QUIZ SCHEMA
   quizes: defineTable({
     createdBy: v.string(),
     givenfiles: v.optional(v.array(v.object({
@@ -118,6 +120,7 @@ export default defineSchema({
       extension: v.string(),
     }))),
     givenUrl: v.optional(v.array(v.string())),
+    givenText: v.optional(v.string()),
     title: v.string(),
     description: v.optional(v.string()),
     category: v.optional(v.string()),
