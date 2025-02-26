@@ -28,8 +28,7 @@ export default function QuizComponent() {
   const [timerKey, setTimerKey] = useState(0)
   const [correctAnswers, setCorrectAnswers] = useState(0)
   const [wrongAnswers, setWrongAnswers] = useState(0)
-  const [explanations, setExplanations] = useState<string[]>([])
-  const [showStats, setShowStats] = useState(false)
+  // const [explanations, setExplanations] = useState<string[]>([])
 
   useEffect(() => {
     if (quizQuestion) {
@@ -45,7 +44,6 @@ export default function QuizComponent() {
       } else {
         setWrongAnswers((prev) => prev + 1)
       }
-      setExplanations((prev) => [...prev, questions[currentQuestionIndex].explanation])
       handleNext()
     }
   }
@@ -92,8 +90,13 @@ export default function QuizComponent() {
 
   return (
     <div className="w-full max-w-2xl mx-auto p-4 sm:p-6 mb-7">
-      {!showExplanation && <Timer key={timerKey} duration={50} onTimerEnd={handleTimerEnd} stop={false} />}
-      {!showExplanation &&
+      <div className="flex w-full items-center gap-4 justify-between">
+      <p className=" flex-start p-2 text-xl font-bold text-white">
+          {currentQuestionIndex + 1}/{questions.length}
+        </p>
+        <Timer key={timerKey} duration={50} onTimerEnd={handleTimerEnd} stop={false} />
+      </div>
+      {
         <QuestionDisplay
           question={questions[currentQuestionIndex]}
           selectedAnswer={selectedAnswer}
