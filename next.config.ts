@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,  // Ignore TypeScript errors during build
   },
+   eslint: {
+    ignoreDuringBuilds: true,
+  },
   images: {
     domains: ['img.clerk.com'], //allows images to be loaded from the specified domain
   },

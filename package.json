@@ -8,6 +8,7 @@
     "dev:backend": "convex dev",
     "predev": "convex dev --until-success && convex dashboard",
     "build": "next build",
+    "postinstall": "pnpm approve-builds",
     "start": "next start",
     "lint": "next lint"
   },
