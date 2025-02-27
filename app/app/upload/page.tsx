@@ -78,11 +78,11 @@ export default function QuizUpload() {
 
     async function handleCreateQuiz() {
         try {
-            const response = await generateQuiz({  userId: user!.id,file: filesArray[0] });
-            console.log("RESPONSEEEE",response)
-            if(response.success){
+            const response = await generateQuiz({ userId: user!.id, file: filesArray[0] });
+            console.log("RESPONSEEEE", response)
+            if (response.success) {
                 console.log("Quiz created successfully")
-            router.push('/app/quiz');
+                router.push('/app/quiz');
             } else if (response.error) {
                 toast.error(response.error);
             }
@@ -90,7 +90,7 @@ export default function QuizUpload() {
         } catch (error) {
             console.error("Error creating quiz:", error);
         }
-        finally{
+        finally {
             console.log("Finally")
             setIsLoading(false)
         }
@@ -183,13 +183,15 @@ export default function QuizUpload() {
                         className="bg-[#4CAF50] hover:bg-[#45a049] text-white text-xl py-6 w-full max-w-xl mx-auto mt-8"
                         disabled={
                             dropzone.fileStatuses.some((file) => file.status === "pending") ||
-                            (userDetails.quizgenStatus !== "Idle" && userDetails.quizgenStatus !== undefined)|| isLoading
+                            (userDetails.quizgenStatus !== "Idle" && userDetails.quizgenStatus !== undefined) || isLoading
                         }
                         onClick={handleCreateQuiz}
                     >
                         {dropzone.fileStatuses.some((file) => file.status === "pending")
                             ? "Uploading..."
-                            ay
+                            : userDetails.quizgenStatus === "Idle"
+                                ? "Create Quiz"
+                                : userDetails.quizgenStatus}
                     </Button>
                 )}
             </div>
