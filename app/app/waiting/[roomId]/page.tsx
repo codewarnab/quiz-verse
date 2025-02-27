@@ -212,7 +212,7 @@ export default function WaitingRoom() {
         </div>
 
         <p className="text-gray-500 text-sm text-center">Waiting for more..</p>
-        { room?.hostId === user?.id && (
+          {userDetails&& userDetails?.role==="teacher" &&(
         <button className="bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-lg w-full text-sm font-medium" onClick={handleUpdateRoomStatus}>
           Start Quiz
         </button>
