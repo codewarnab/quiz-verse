@@ -21,7 +21,7 @@ export default function TextInputPage() {
         try {
             const response = await generateQuizfromText({ text, userId: user!.id })
             console.log('Quiz generated:', response)
-            if(response.success){
+            if (response.success) {
                 router.push("/app/quiz")
             }
         } catch (error) {
@@ -40,7 +40,9 @@ export default function TextInputPage() {
                     onChange={(e) => setText(e.target.value)}
                 />
                 <Button onClick={handleGenerateQuiz} className="w-full bg-[#4CAF50] hover:bg-[#45a049] text-white">
-                    Generate Quiz
+                    : userDetails.quizgenStatus === "Idle"
+                    ? "Create Quiz"
+                            : userDetails.quizgenStatus}
                 </Button>
             </div>
         </div>

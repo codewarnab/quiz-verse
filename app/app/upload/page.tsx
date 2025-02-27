@@ -186,9 +186,7 @@ export default function QuizUpload() {
                     >
                         {dropzone.fileStatuses.some((file) => file.status === "pending")
                             ? "Uploading..."
-                            : userDetails.quizgenStatus === "Idle"
-                            ? "Create Quiz"
-                            : userDetails.quizgenStatus}
+                            ay
                     </Button>
                 )}
             </div>
