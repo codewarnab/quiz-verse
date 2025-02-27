@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   title: "Study Sync ",
   description: "Unleash the power of multimedia quizzes",
   icons: {
-    icon: "/convex.svg",
+    icon: "/BuyBox.png",
   },
 };
 
