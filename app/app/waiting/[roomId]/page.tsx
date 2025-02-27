@@ -58,10 +58,8 @@ export default function WaitingRoom() {
   // Redirect to the disabled room page if the room is deleted
   useEffect(() => {
     if (room && room.status === "closed") {
-      if (userDetails?.role === "teacher" || userDetails?.role === "student") {
       router.push("/app/disabledroom");
       deleteRoom({ roomId: String(clientRoomId) });
-    }
   }
   }, [room]);
 

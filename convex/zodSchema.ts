@@ -13,7 +13,7 @@ export const quizSchema = z.object({
     instructions: z.string().optional().describe("Brief instructions for taking the quiz"),
 
 
-    numberOfQuestions: z.number().describe("Total number of questions in the quiz"),
+    numberOfQuestions: z.number().describe("Total number of questions in the quiz, more than 1 question is expected"),
     questions: z.array(
         z.object({
             question: z.string().describe("The question text"),
@@ -23,7 +23,7 @@ export const quizSchema = z.object({
             points: z.number().optional().describe("Points awarded for a correct answer"),
             hint: z.string().optional().describe("A short hint to help answer the question"),
         })
-    ).describe("The generated MCQ questions"),
+    ).describe("The generated MCQ questions, more than 1 question is expected"),
 
 });
 

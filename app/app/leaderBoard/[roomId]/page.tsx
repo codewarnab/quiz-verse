@@ -1,52 +1,71 @@
-"use client";
-import React, { useEffect } from 'react';
+"use client"
+import React, { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { useParams, useRouter } from "next/navigation";
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Share2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import LeaderBoard from '@/components/quizflow/LeaderBoard';
 
 const LeaderBoardPage = () => {
-  const { roomId }: { roomId: string } = useParams();
+  const { roomId } = useParams();
   const updateRoomStatus = useMutation(api.rooms.updateRoomStatus);
   const deleteRoom = useMutation(api.rooms.deleteRoom);
-  const room = useQuery(api.rooms.getRoom, { roomId: String(roomId) });
+  const [roomDeleted, setRoomDeleted] = useState(false);
+
+  const room = !roomDeleted? useQuery(api.rooms.getRoom, { roomId: String(roomId) }): null;
   const router = useRouter();
+
   const handleShareClick = () => {
     const shareUrl = `${window.location.origin}/app/leaderBoard/${roomId}`;
     navigator.clipboard.writeText(shareUrl);
     alert('Link copied to clipboard!');
   };
-useEffect(() => {
-    if (room && room.status === "closed") {
-      router.push("/app/disabledroom");
-      deleteRoom({ roomId: String(roomId) });
+
+  useEffect(() => {
+    if (room && room.status === 'closed') {
+      router.push('/app');
+      deleteRoom({ roomId: String(roomId) })
+        .then(() => {
+          console.log('Room successfully deleted.');
+        })
+        .catch((error) => {
+          console.error('Failed to delete room:', error);
+        });
     }
-  }, [room, router, roomId]);
-  const handleEndQuiz = () => {
+  }, [room, router, roomId, deleteRoom]);
+
+  const handleEndQuiz = async () => {
     try {
-      // TODO: SHOW A TOAST TO ALL USER THAT QUIZ ENDED
-       updateRoomStatus({ roomId: String(roomId), status: "completed" });
+      await updateRoomStatus({ roomId: String(roomId), status: 'completed' });
+      console.log('Room status updated to completed.');
     } catch (error) {
-      console.error("Failed to update room status:", error);
+      console.error('Failed to update room status:', error);
     }
   };
-  const handleExit = () => {
-    updateRoomStatus({ roomId: String(roomId), status: "closed" });
+
+  const handleExit = async () => {
+    try {
+      await updateRoomStatus({ roomId: String(roomId), status: 'closed' });
+      setRoomDeleted(true);
+      console.log('Room status updated to closed.');
+      router.push('/app/disabledroom');
+    } catch (error) {
+      console.error('Failed to update room status:', error);
+    }
   };
 
   return (
     <div className="min-h-screen bg-black text-white p-4">
       <div className="mb-8 p-6 bg-zinc-950 border-zinc-800 border-[0.1px] rounded-lg shadow-lg">
-      <h2 className="text-4xl font-extrabold text-green-500  mb-4">
-        Leaderboard Champions
-      </h2>
-      <p className="text-lg text-gray-400 mb-2">
-        Discover the top performers and celebrate their outstanding achievements!
-      </p>
-    </div>
+        <h2 className="text-4xl font-extrabold text-green-500 mb-4">
+          Leaderboard Champions
+        </h2>
+        <p className="text-lg text-gray-400 mb-2">
+          Discover the top performers and celebrate their outstanding achievements!
+        </p>
+      </div>
 
       <LeaderBoard roomId={String(roomId)} />
 
@@ -68,18 +87,12 @@ useEffect(() => {
       </div>
 
       <div className="flex justify-evenly mt-4">
-        <button
-          onClick={handleEndQuiz}
-          className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-semibold shadow-lg"
-        >
+        <Button variant="outline" onClick={handleEndQuiz}>
           End Quiz
-        </button>
-        <button
-          onClick={handleExit}
-          className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-semibold shadow-lg"
-        >
-        Exit
-        </button>
+        </Button>
+        <Button variant="outline" onClick={handleExit}>
+          Exit
+        </Button>
       </div>
     </div>
   );

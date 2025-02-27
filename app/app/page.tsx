@@ -58,7 +58,7 @@ export default function HomePage() {
                             <div className="flex justify-between items-center">
                                 <div>
                                     <h3 className="text-2xl font-bold mb-2">URL</h3>
-                                    <p className="text-white/80">Give a url</p>
+                                    <p className="text-white/80">Paste a website URL</p>
                                 </div>
                                 <Link2Icon className="w-8 h-8 text-white" />
                             </div>

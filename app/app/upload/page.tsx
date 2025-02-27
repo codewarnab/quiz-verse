@@ -19,6 +19,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from 'next/navigation';
 import { useAction } from "convex/react";
+import { toast } from "sonner";
 interface UploadedFile {
     url: string;
     size: number;
@@ -82,6 +83,8 @@ export default function QuizUpload() {
             if(response.success){
                 console.log("Quiz created successfully")
             router.push('/app/quiz');
+            } else if (response.error) {
+                toast.error(response.error);
             }
 
         } catch (error) {

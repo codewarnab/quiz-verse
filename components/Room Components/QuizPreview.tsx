@@ -45,7 +45,7 @@ const QuizPreview: React.FC<QuizPreviewProps> = ({ quiz, filesArray }) => {
 
     const handleStartingQuiz = async () => {
         try {
-            console.log("Starting Quiz");
+            console.log("Starting Quiz", String(roomId));
             const newRoomId = await updateQuizInfoInRoom({
                 roomId: String(roomId),
                 givenfiles: filesArray.length > 0 && filesArray[0].extension && filesArray[0].size && filesArray[0].fileName && filesArray[0].mimeType ? [{

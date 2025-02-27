@@ -1,7 +1,7 @@
 import { generateObject } from "ai";
 import { processedschema, quizSchema } from "./zodSchema";
 import { google } from "@ai-sdk/google";
-import { QUIZ_GENERATION_SYSTEM_MESSAGE, systemMessageFile } from "./systemMessagtes";
+import { QUIZ_GENERATION_SYSTEM_MESSAGE_FILE, systemMessageFile } from "./systemMessagtes";
 import { z } from "zod";
 
 export function getHeaders(): Record<string, string> {
@@ -172,10 +172,11 @@ export async function generateQuizQuestionsImage(
         const imagePart = { role: "user", type: "image", image: new URL(fileUrl).toString(), mimeType };
         // Combine the parts into a single JSON string.
         const combinedContent = JSON.stringify([textPart, imagePart]);
+        console.log('combinedContent:', combinedContent);
 
         const { object } = await generateObject({
             model: google("gemini-1.5-flash"),
-            system: QUIZ_GENERATION_SYSTEM_MESSAGE,
+            system: QUIZ_GENERATION_SYSTEM_MESSAGE_FILE,
             schema: quizSchema,
             messages: [
                 {
@@ -184,6 +185,7 @@ export async function generateQuizQuestionsImage(
                 },
             ],
         });
+        console.log('mcqResult:', object);
         return object;
     } catch (error) {
         console.error("Error generating quiz questions for image:", error);
@@ -200,7 +202,7 @@ export async function generateQuizQuestionsFile(
     try {
         const { object } = await generateObject({
             model: google("gemini-1.5-flash"),
-            system: QUIZ_GENERATION_SYSTEM_MESSAGE,
+            system: QUIZ_GENERATION_SYSTEM_MESSAGE_FILE,
             schema: quizSchema,
             messages: [
                 {
